@@ -2,7 +2,6 @@
 import navbar from './components/navbar.vue'
 import sidenav from './components/sidenav.vue'
 import content from './components/content.vue'
-import dht_sensor from './components/dhtsensor.vue'
 </script>
 
 <template>

@@ -2,11 +2,11 @@ const router = require('koa-router')()
 const mqtt = require('mqtt');
 
 var mqtt_opt = {
-  port: 1883,
+  port: 18283,
   client: 'watch-cat-server',
 }
 
-const mqttClient = mqtt.connect('mqtt://mtdl.ddns.net', mqtt_opt);
+const mqttClient = mqtt.connect('mqtt://benson.hopto.org', mqtt_opt);
 
 mqttClient.on('connect', () => {
   console.log('Connect to mqtt server!');
