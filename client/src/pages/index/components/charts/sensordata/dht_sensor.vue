@@ -1,57 +1,39 @@
 <script setup>
-import { ref, computed } from 'vue';
+import { computed } from 'vue';
+import { useStore } from 'vuex';
 
 defineProps({
-    msg: {
-        type: String,
-        default: 'DHT22'
+    id: {
+      type: String,
+      default: 'Unknown'
+    },
+    position: {
+      type: String,
+      default: 'Unknown'
     },
 })
 
-const temperature = ref(null), humidity = ref(null);
-const online = ref("OFF")
-const currentTime = ref('');
+const store = useStore();
 
-async function fetchTemperature_Humidity() {
-    await fetch('/api/dht')
-        .then(response => response.json())
-        .then(data => {
-            console.log(data)
-            temperature.value = parseFloat(data.temperature).toFixed(2);
-            humidity.value = parseFloat(data.humidity).toFixed(2);
-            if (!isNaN(parseFloat(temperature.value)) && !isNaN(parseFloat(humidity.value))) {
-                updateCurrentTime();
-                online.value = "ON";
-            }
-        })
-        .catch(error => {
-            online.value = "OFF";
-            console.error(error)
-        });
+const temperature = computed(() => store.state.module_dht.temperature);
+const humidity = computed(() => store.state.module_dht.humidity);
+const online = computed(() => store.state.module_dht.online);
+const currentTime = computed(() => store.state.module_dht.currentTime);
+
+function getTemperature_Humidity() {
+    store.dispatch('getTemperature_Humidity');
 }
 
-fetchTemperature_Humidity();
-
-setInterval(fetchTemperature_Humidity, 10000);
-
-function updateCurrentTime() {
-    const now = new Date();
-    const year = now.getFullYear();
-    const month = (now.getMonth() + 1).toString().padStart(2, '0');
-    const day = now.getDate().toString().padStart(2, '0');
-    const hours = now.getHours().toString().padStart(2, '0');
-    const minutes = now.getMinutes().toString().padStart(2, '0');
-    const seconds = now.getSeconds().toString().padStart(2, '0');
-    currentTime.value = `${year}/${month}/${day}/${hours}:${minutes}:${seconds}`;
-}
+getTemperature_Humidity();
+setInterval(getTemperature_Humidity, 500);
 </script>
 
 <template>
     <tr>
         <!-- Name, Data, Position, Online, Last upload -->
-        <td>{{ msg }}</td>
+        <td>{{ id }}</td>
         <td>Temperature : {{ temperature }}, Humidity : {{ humidity }}</td>
-        <td>Bedroom</td>
+        <td>{{ position }}</td>
         <td>{{ online }}</td>
         <td>{{ currentTime }}</td>
     </tr>

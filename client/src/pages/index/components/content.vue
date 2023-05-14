@@ -47,7 +47,7 @@ const columns = [
                         <card bg="bg-danger" cardtitle="Danger Card" />
                     </div>
                 </div>
-                <div class="row">
+                <!-- <div class="row">
                     <div class="col-xl-4">
                         <areachart />
                     </div>
@@ -57,7 +57,7 @@ const columns = [
                     <div class="col-xl-4">
                         <piechart />
                     </div>
-                </div>
+                </div> -->
                 <datatable v-bind:columns="columns" />
             </div>
         </main>

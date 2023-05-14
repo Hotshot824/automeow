@@ -43,7 +43,7 @@ window.addEventListener('DOMContentLoaded', event => {
                     </tr>
                 </tfoot>
                 <tbody>
-                    <dht_sensor />
+                    <dht_sensor id="DHT Sensor" position="Bedroom"/>
                 </tbody>
             </table>
         </div>
