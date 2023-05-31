@@ -2,7 +2,7 @@ const router = require('koa-router')()
 const mqtt = require('mqtt');
 
 var mqtt_opt = {
-  port: 18283,
+  port: 20083,
   client: 'watch-cat-server',
 }
 
