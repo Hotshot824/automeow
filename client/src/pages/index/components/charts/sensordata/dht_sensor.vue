@@ -15,17 +15,17 @@ defineProps({
 
 const store = useStore();
 
-const temperature = computed(() => store.state.module_dht.temperature);
-const humidity = computed(() => store.state.module_dht.humidity);
-const online = computed(() => store.state.module_dht.online);
-const currentTime = computed(() => store.state.module_dht.currentTime);
+const temperature = computed(() => store.state.dht_sensor.temperature);
+const humidity = computed(() => store.state.dht_sensor.humidity);
+const online = computed(() => store.state.dht_sensor.online);
+const currentTime = computed(() => store.state.dht_sensor.currentTime);
 
 function getTemperature_Humidity() {
-    store.dispatch('getTemperature_Humidity');
+    store.dispatch('dht_sensor/getTemperature_Humidity');
 }
 
 getTemperature_Humidity();
-setInterval(getTemperature_Humidity, 500);
+setInterval(getTemperature_Humidity, 10000);
 </script>
 
 <template>
