@@ -55,4 +55,30 @@ router.get('/dht', async (ctx, next) => {
   }
 })
 
+let flag = true;
+router.post('/control', async (ctx, next) => {
+  const requestBody = ctx.request.body;
+  switch (requestBody.topic) {
+    case 'Group10_boardA/sensor/controlLED':
+      if (flag) {
+        mqttClient.publish('Group10_boardA/sensor/controlLED', "0");
+        flag = false;
+      } else {
+        mqttClient.publish('Group10_boardA/sensor/controlLED', "1");
+        flag = true;
+      }
+
+      ctx.body = {
+        title: "Hello"
+      }
+      break;
+  
+    default:
+      ctx.body = {
+        title: 'test'
+      }
+      break;
+  }
+})
+
 module.exports = router
