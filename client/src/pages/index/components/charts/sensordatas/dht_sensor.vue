@@ -34,7 +34,7 @@ setInterval(getTemperature_Humidity, 10000);
         <td>{{ id }}</td>
         <td>Temperature : {{ temperature }}, Humidity : {{ humidity }}</td>
         <td>{{ position }}</td>
-        <td>{{ online }}</td>
+        <td>{{ online ? 'Active' : 'Inactive' }}</td>
         <td>{{ currentTime }}</td>
     </tr>
 </template>

@@ -1,5 +1,5 @@
 <script setup>
-import dht_sensor from './sensordata/dht_sensor.vue';
+import { components } from './sensordatas'
 
 defineProps({
     tabletitle: {
@@ -43,7 +43,8 @@ window.addEventListener('DOMContentLoaded', event => {
                     </tr>
                 </tfoot>
                 <tbody>
-                    <dht_sensor id="DHT Sensor" position="Bedroom"/>
+                    <component :is="components.dht_sensor" id="DHT Sensor" position="Bedroom"/>
+                    <!-- <dht_sensor id="DHT Sensor" position="Bedroom"/> -->
                 </tbody>
             </table>
         </div>

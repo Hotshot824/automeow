@@ -1,5 +1,5 @@
-var temperature = "Unknown", humidity = "Unknown", currentTime = "Unknown", online = "Unknown"
-async function fetchTemperature_Humidity() {
+var temperature = "Unknown", humidity = "Unknown", currentTime = "Unknown", online = false
+async function fetchDHTdata() {
     await fetch('/api/dht')
         .then(response => response.json())
         .then(data => {
@@ -8,11 +8,33 @@ async function fetchTemperature_Humidity() {
             humidity = parseFloat(data.humidity).toFixed(2);
             if (!isNaN(parseFloat(data.temperature)) && !isNaN(parseFloat(data.humidity))) {
                 currentTime = updateCurrentTime();
-                online = "ON"
+                online = true
             }
         })
         .catch(error => {
-            online = "OFF"
+            online = false
+            console.log(error);
+        })
+}
+
+async function fetchControlLED() {
+    let data = {
+        topic: 'Group10_boardA/sensor/controlLED',
+        control: true
+    }
+    await fetch('/api/control', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+    })
+        .then(response => response.json())
+        .then(data => {
+            console.log(data)
+        })
+        .catch(error => {
+            online = false
             console.log(error);
         })
 }
@@ -29,8 +51,8 @@ function updateCurrentTime() {
 }
 
 export default {
-    async getDHTsensor() {
-        await fetchTemperature_Humidity();
+    async getData() {
+        await fetchDHTdata();
         return {
             "temperature": temperature,
             "humidity": humidity,
@@ -38,4 +60,7 @@ export default {
             "online": online
         }
     },
+    async controlLED() {
+        await fetchControlLED();
+    }
 }

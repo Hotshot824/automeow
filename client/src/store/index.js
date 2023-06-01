@@ -7,6 +7,6 @@ export default createStore({
   modules: {
     dht_sensor,
   },
-  strict: debug,
+  strict: false,
   plugins: debug ? [createLogger()] : []
 })

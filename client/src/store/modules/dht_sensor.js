@@ -16,12 +16,15 @@ const getters = {
 // actions
 const actions = {
     async getTemperature_Humidity({ commit }) {
-        let data = await sensor.getDHTsensor()
+        let data = await sensor.getData();
         commit('updateTemperature', data.temperature);
         commit('updateHumidity', data.humidity);
         commit('updateCurrentTime', data.currentTime);
         commit('updateOnline', data.online);
     },
+    async controlLED() {
+        await sensor.controlLED();
+    }
 }
 
 // mutations
