@@ -10,6 +10,9 @@ const index = require('./routes/index')
 const users = require('./routes/users')
 const sensors = require('./routes/sensors')
 
+const pool = require('./mysql')
+app.context.db = pool;
+
 // error handler
 onerror(app)
 

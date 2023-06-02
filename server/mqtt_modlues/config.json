@@ -1,8 +1,0 @@
-{
-    "mqtt": {
-        "host": "mqtt://benson.hopto.org",
-        "port": 20083,
-        "user": "USERNAME",
-        "password": "PASSWORD"
-    }
-}
