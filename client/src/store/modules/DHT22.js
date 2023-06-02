@@ -6,7 +6,7 @@ const state = () => ({
     temperature: null,
     humidity: null,
     online: null,
-    current_time: null,
+    time: null,
 })
 
 // getters
@@ -20,12 +20,15 @@ const actions = {
         commit('updateData', {
             temperature: data.temperature,
             humidity: data.humidity,
-            current_time: data.current_time,
+            time: data.time,
             online: data.online
         });
     },
-    async toggleDHT() {
-        await sensor.toggleDHT();
+    async toggleDHT({ commit }) {
+        let data = await sensor.toggleDHT();
+        commit('updateOnline', {
+            online: data.online
+        });
     }
 }
 
@@ -34,7 +37,10 @@ const mutations = {
     updateData(state, payload) {
         state.temperature = payload.temperature;
         state.humidity = payload.humidity;
-        state.current_time = payload.current_time;
+        state.time = payload.time;
+        state.online = payload.online;
+    },
+    updateOnline(state, payload) {
         state.online = payload.online;
     },
 }
