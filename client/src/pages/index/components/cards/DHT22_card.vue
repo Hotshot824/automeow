@@ -20,6 +20,13 @@ const online = computed(() => store.state.DHT22.online);
 const handleButtonClick = () => {
   store.dispatch('DHT22/toggleDHT');
 };
+
+function getData() {
+    store.dispatch('DHT22/getData');
+}
+
+getData();
+setInterval(getData, 10000);
 </script>
 
 <template>

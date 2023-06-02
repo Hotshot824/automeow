@@ -16,4 +16,15 @@ router.get('/json', async (ctx, next) => {
   }
 })
 
+// koa2 and mysql2 promise query example.
+router.get('/database', async (ctx, next) => {
+  const pool = ctx.db;
+  const promisePool = pool.promise();
+  const [rows, fields] = await promisePool.query("SELECT DATABASE() as `database`;");
+  ctx.body = {
+    database: rows[0]['database'],
+  };
+  console.log(rows)
+})
+
 module.exports = router

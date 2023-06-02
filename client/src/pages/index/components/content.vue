@@ -1,10 +1,10 @@
 <script setup>
-import datatable from './charts/datatable.vue'
+import datatable from './datatable.vue'
 import areachart from './charts/areachart.vue'
 import barchart from './charts/barchart.vue'
 import piechart from './charts/piechart.vue'
-import card from './charts/cards/card.vue'
-import DHT22_card from './charts/cards/DHT22_card.vue'
+import card from './cards/card.vue'
+import DHT22_card from './cards/DHT22_card.vue'
 
 defineProps({
     title: {
@@ -48,7 +48,7 @@ const columns = [
                         <card bg="bg-danger" cardtitle="Danger Card" />
                     </div>
                 </div>
-                <!-- <div class="row">
+                <div class="row">
                     <div class="col-xl-4">
                         <areachart />
                     </div>
@@ -58,7 +58,7 @@ const columns = [
                     <div class="col-xl-4">
                         <piechart />
                     </div>
-                </div> -->
+                </div>
                 <datatable v-bind:columns="columns" />
             </div>
         </main>

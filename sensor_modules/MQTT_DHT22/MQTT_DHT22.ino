@@ -1,20 +1,18 @@
-#include <SPI.h>
-#include <WiFiNINA.h>
-#include "DHT.h"
+#include <LWiFi.h>
 #include <PubSubClient.h>
+#include "DHT.h"
 
-#define DHTPIN 3
-#define DHTTYPE DHT11
-
+#define DHTPIN A0     // what pin we're connected to
+#define DHTTYPE DHT22 // DHT 22  (AM2302)
 DHT dht(DHTPIN, DHTTYPE);
 
 // WiFi AP ssid / password here
-char ssid[] = "3715";     //  your network SSID (name)
-char pass[] = "12345678"; // your network password (use for WPA, or use as key for WEP)
+char ssid[] = "SSID";     //  your network SSID (name)
+char pass[] = "PASSWORD"; // your network password (use for WPA, or use as key for WEP)
 
 // MQTT Broker info
-// IPAddress server(140, 127, 196, 119);
-char server[] = "test.mosquitto.org";
+// IPAddress server(192, 168, 1, 182);
+char server[] = "MQTT SERVER";
 int port = 1883;
 
 // MQTT Client info
@@ -22,32 +20,30 @@ int port = 1883;
 // Note that a broker allows an individual client to create only on session.
 // If a session is created by another client with same cliend ID, the former one will be disconnected.
 // Thus, each sensor node's client must be different from each other.
-char client_id[] = "SensorNode_001";
+char client_id[] = "automeow-DHT22";
 
 // MQTT topics
-#define TOPIC_INFO "ghliaw/info"
-#define TOPIC_TEMP "ghliaw/sensor/temp"
-#define TOPIC_HUM "ghliaw/sensor/hum"
-#define TOPIC_LED_CONTROL "ghliaw/control/led"
+#define TOPIC_INFO "automeow/DHT22/info"
+#define TOPIC_HUMIDITY "automeow/DHT22/humidity"
+#define TOPIC_TEMPERATURE "automeow/DHT22/temperature"
+#define TOPIC_DHT_CONTROL "automeow/DHT22/controlDHT"
 
 // Clients for MQTT
 WiFiClient wifiClient;
 PubSubClient client(wifiClient);
 
+// Timer info
+#define DHT_read_interval 10000
+unsigned long temp_last_time;
+
 // LED Control info
 #define LED_PIN LED_BUILTIN
 typedef enum
 {
-  LED_OFF = 0,
-  LED_ON,
-  LED_FLASH
+  DHT_OFF = 0,
+  DHT_ON,
 } LEDStatus;
-LEDStatus led_status = LED_OFF;
-
-// Timer info
-#define TEMP_PERIOD 10000
-#define LED_FLASH_PERIOD 200
-unsigned long temp_last_time, led_last_time;
+LEDStatus dht_status = DHT_ON;
 
 void led_on()
 {
@@ -57,11 +53,6 @@ void led_on()
 void led_off()
 {
   digitalWrite(LED_PIN, LOW);
-}
-
-void led_toggle()
-{
-  digitalWrite(LED_PIN, !digitalRead(LED_PIN));
 }
 
 void callback(char *topic, byte *payload, unsigned int length)
@@ -77,18 +68,15 @@ void callback(char *topic, byte *payload, unsigned int length)
   Serial.println();
 
   // If LED Control command is incoming, change LED status
-  if (!strcmp(topic, TOPIC_LED_CONTROL))
+  if (!strcmp(topic, TOPIC_DHT_CONTROL))
   {
     switch (payload[0])
     {
     case '0':
-      led_status = LED_OFF;
+      dht_status = DHT_OFF;
       break;
     case '1':
-      led_status = LED_ON;
-      break;
-    case '2':
-      led_status = LED_FLASH;
+      dht_status = DHT_ON;
       break;
     default:
     {
@@ -108,9 +96,10 @@ void reconnect()
     {
       Serial.println("connected");
       // Once connected, publish an announcement...
-      client.publish(TOPIC_INFO, "sensor node ready ...");
+      client.publish(TOPIC_INFO, "ON");
       // ... and resubscribe
-      client.subscribe(TOPIC_LED_CONTROL);
+      client.subscribe(TOPIC_DHT_CONTROL);
+      // ... and resubscribe
     }
     else
     {
@@ -132,13 +121,6 @@ void setup()
   client.setServer(server, port);
   client.setCallback(callback);
 
-  // start up DHT sensor
-  dht.begin();
-
-  // setup LED/Button pin
-  pinMode(LED_PIN, OUTPUT);
-  led_off();
-
   // setup Wifi connection
   while (WL_CONNECTED != WiFi.status())
   {
@@ -152,13 +134,14 @@ void setup()
   Serial.println("WiFi connected !!");
   printWifiStatus();
 
-  led_last_time = millis();
   temp_last_time = millis();
 }
 
 void loop()
 {
   unsigned long current_time;
+  float h, t;
+  long RangeInCentimeters;
 
   // Check MQTT broker connection status
   // If it is disconnected, reconnect to the broker
@@ -169,51 +152,48 @@ void loop()
 
   // Get temperature & humidity and publish them
   current_time = millis();
-  if (TEMP_PERIOD < (current_time - temp_last_time))
+  if (DHT_read_interval < (current_time - temp_last_time))
   {
-    // Read Humidity & Temperature (Celsius)
-    float h = dht.readHumidity();
-    float t = dht.readTemperature();
-    // Output to serial terminal
-    Serial.print("Humidity: ");
-    Serial.print(h);
-    Serial.print(" %\t");
-    Serial.print("Temperature: ");
-    Serial.print(t);
-    Serial.println(" *C ");
-    // pubilsh to MQTT broker
-    char buf[10];
-    sprintf(buf, "%s", String((float)t, 2).c_str());
-    client.publish(TOPIC_TEMP, buf);
-    sprintf(buf, "%s", String((float)h, 2).c_str());
-    client.publish(TOPIC_HUM, buf);
+    if (dht_status == DHT_OFF)
+    {
+      client.publish(TOPIC_INFO, "OFF");
+    }
+    else
+    {
+      digitalWrite(LED_BUILTIN, HIGH);
+      delay(500);
+      digitalWrite(LED_BUILTIN, LOW);
+      h = dht.readHumidity();
+      t = dht.readTemperature();
+      char buffer[50];
+      sprintf(buffer, "%f", h);
+      client.publish(TOPIC_HUMIDITY, buffer);
+      Serial.print("Humidity: ");
+      Serial.println(buffer);
+      sprintf(buffer, "%f", t);
+      client.publish(TOPIC_TEMPERATURE, buffer);
+      Serial.print("Temperature: ");
+      Serial.println(buffer);
+      client.publish(TOPIC_INFO, "ON");
+    }
     // update last time value
     temp_last_time = current_time;
   }
 
-  // Control LED according to led_status
-  switch (led_status)
+  // Control LED according to dht_status
+  switch (dht_status)
   {
-  case LED_OFF:
+  case DHT_OFF:
     led_off();
     break;
-  case LED_ON:
+  case DHT_ON:
     led_on();
-    break;
-  case LED_FLASH:
-    current_time = millis();
-    if (LED_FLASH_PERIOD < (current_time - led_last_time))
-    {
-      led_toggle();
-      led_last_time = current_time;
-    }
     break;
   default:
   {
   }
   }
 
-  // Keep MQTT process on going
   client.loop();
 }
 

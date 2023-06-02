@@ -20,6 +20,7 @@
     "koa-static": "^5.0.0",
     "koa-views": "^6.2.0",
     "mqtt": "^4.3.7",
+    "mysql2": "^3.3.3",
     "pug": "^2.0.3"
   },
   "devDependencies": {
