@@ -1,11 +1,11 @@
 import { createStore, createLogger } from 'vuex'
-import dht_sensor from './modules/dht_sensor'
+import DHT22 from './modules/DHT22'
 
 const debug = process.env.NODE_ENV !== 'production'
 
 export default createStore({
   modules: {
-    dht_sensor,
+    DHT22,
   },
   strict: false,
   plugins: debug ? [createLogger()] : []

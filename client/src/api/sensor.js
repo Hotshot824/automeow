@@ -1,28 +1,30 @@
-var temperature = "Unknown", humidity = "Unknown", currentTime = "Unknown", online = false
+var temperature = "Unknown", humidity = "Unknown", current_time = "Unknown", online = false
 async function fetchDHTdata() {
-    await fetch('/api/dht')
+    await fetch('/api/sensors/dht')
         .then(response => response.json())
         .then(data => {
-            console.log(data)
+            // console.log(data);
             temperature = parseFloat(data.temperature).toFixed(2);
             humidity = parseFloat(data.humidity).toFixed(2);
-            if (!isNaN(parseFloat(data.temperature)) && !isNaN(parseFloat(data.humidity))) {
-                currentTime = updateCurrentTime();
-                online = true
+            if (data.online == 'ON') {
+                current_time = updateCurrentTime();
+                online = true;
+            } else {
+                online = false;
             }
         })
         .catch(error => {
-            online = false
+            online = false;
             console.log(error);
         })
 }
 
-async function fetchControlLED() {
+async function fetchToggleDHT() {
     let data = {
-        topic: 'Group10_boardA/sensor/controlLED',
+        topic: 'Group10_boardA/DHT22/controlDHT',
         control: true
     }
-    await fetch('/api/control', {
+    await fetch('/api/sensors/dht/control', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
@@ -31,10 +33,10 @@ async function fetchControlLED() {
     })
         .then(response => response.json())
         .then(data => {
-            console.log(data)
+            console.log(data);
         })
         .catch(error => {
-            online = false
+            online = false;
             console.log(error);
         })
 }
@@ -56,11 +58,11 @@ export default {
         return {
             "temperature": temperature,
             "humidity": humidity,
-            "currentTime": currentTime,
+            "current_time": current_time,
             "online": online
         }
     },
-    async controlLED() {
-        await fetchControlLED();
+    async toggleDHT() {
+        await fetchToggleDHT();
     }
 }
