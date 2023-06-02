@@ -131,3 +131,6 @@ dist
 .pnp.*
 
 bootstrap-5.0.2-examples/
+
+# Mysql data
+mysql/

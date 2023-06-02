@@ -1,4 +1,4 @@
-var temperature = "Unknown", humidity = "Unknown", time = "Unknown", online = false
+var temperature = "", humidity = "", time = "", online = false
 async function fetchDHTdata() {
     await fetch('/api/sensors/dht')
         .then(response => response.json())
@@ -6,8 +6,8 @@ async function fetchDHTdata() {
             console.log(data);
             temperature = parseFloat(data.temperature).toFixed(2);
             humidity = parseFloat(data.humidity).toFixed(2);
+            time = data.time;
             if (data.online == 'ON') {
-                time = data.time;
                 online = true;
             } else {
                 online = false;
@@ -33,7 +33,7 @@ async function fetchToggleDHT() {
     })
         .then(response => response.json())
         .then(data => {
-            console.log(data);
+            // console.log(data);
             if (data.online == 'ON') {
                 online = true;
             } else {

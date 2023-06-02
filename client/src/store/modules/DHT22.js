@@ -1,4 +1,4 @@
-import sensor from '../../api/sensor'
+import DHT22 from '../../api/DHT22'
 
 // initial state
 // shape: [{ id, quantity }]
@@ -16,7 +16,7 @@ const getters = {
 // actions
 const actions = {
     async getData({ commit }) {
-        let data = await sensor.getData();
+        let data = await DHT22.getData();
         commit('updateData', {
             temperature: data.temperature,
             humidity: data.humidity,
@@ -25,7 +25,7 @@ const actions = {
         });
     },
     async toggleDHT({ commit }) {
-        let data = await sensor.toggleDHT();
+        let data = await DHT22.toggleDHT();
         commit('updateOnline', {
             online: data.online
         });
