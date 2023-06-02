@@ -1,7 +1,7 @@
-import dht_sensor from "./dht_sensor.vue";
+import DHT22_sensor from "./DHT22_sensor.vue";
 
 const components = {
-  'dht_sensor': dht_sensor,
+  'DHT22_sensor': DHT22_sensor,
 }
 
 export {

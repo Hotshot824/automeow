@@ -15,10 +15,10 @@ defineProps({
 
 const store = useStore();
 
-const online = computed(() => store.state.dht_sensor.online);
+const online = computed(() => store.state.DHT22.online);
 
 const handleButtonClick = () => {
-  store.dispatch('dht_sensor/controlLED');
+  store.dispatch('DHT22/toggleDHT');
 };
 </script>
 
