@@ -40,37 +40,37 @@ mqttClient.on('message', (topic, msg) => {
 router.prefix('/sensors')
 
 router.get('/dht', async (ctx, next) => {
-    ctx.body = {
-      online: o,
-      temperature: t,
-      humidity: h
-    }
-  })
-  
+  ctx.body = {
+    online: o,
+    temperature: t,
+    humidity: h
+  }
+})
+
 let flag = true;
 router.post('/dht/control', async (ctx, next) => {
-const requestBody = ctx.request.body;
-switch (requestBody.topic) {
+  const requestBody = ctx.request.body;
+  switch (requestBody.topic) {
     case 'Group10_boardA/DHT22/controlDHT':
-    if (flag) {
+      if (flag) {
         mqttClient.publish('Group10_boardA/DHT22/controlDHT', "0");
         flag = false;
-    } else {
+      } else {
         mqttClient.publish('Group10_boardA/DHT22/controlDHT', "1");
         flag = true;
-    }
+      }
 
-    ctx.body = {
+      ctx.body = {
         message: "DHT sensor toggle."
-    }
-    break;
+      }
+      break;
 
     default:
-    ctx.body = {
+      ctx.body = {
         title: 'Not have the correct topic.'
-    }
-    break;
-}
+      }
+      break;
+  }
 })
 
 module.exports = router
