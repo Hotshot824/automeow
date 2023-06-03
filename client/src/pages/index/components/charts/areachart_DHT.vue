@@ -22,7 +22,7 @@ export default {
         DHT22.fetchDHTHistoryData()
             .then(response => response.json())
             .then(data => {
-                const { temperatures, humidities, lastupdate } = extract(data.history);
+                const { temperatures, humidities, lastupdate } = extract(data.history.reverse());
                 // Set new default font family and font color to mimic Bootstrap's default styling
                 Chart.defaults.global.defaultFontFamily = '-apple-system,system-ui,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif';
                 Chart.defaults.global.defaultFontColor = '#292b2c';
@@ -36,12 +36,13 @@ export default {
                         datasets: [
                             {
                                 label: "Temperatures",
+                                yAxisID: 'temperature',
                                 lineTension: 0.3,
-                                backgroundColor: "rgba(255, 153, 153, 0.2)", // 淡紅色
-                                borderColor: "rgba(255, 153, 153, 1)",
+                                backgroundColor: "rgba(255, 103, 103, 0.3)",
+                                borderColor: "rgba(255, 103, 103, 1)",
                                 pointRadius: 5,
                                 pointBackgroundColor: "rgba(255, 153, 153, 1)",
-                                pointBorderColor: "rgba(255, 255, 255, 0.8)",
+                                pointBorderColor: "rgba(255, 103, 103, 0.8)",
                                 pointHoverRadius: 5,
                                 pointHoverBackgroundColor: "rgba(255, 153, 153, 1)",
                                 pointHitRadius: 50,
@@ -50,11 +51,12 @@ export default {
                             },
                             {
                                 label: "Humidities",
+                                yAxisID: 'humidity',
                                 lineTension: 0.3,
-                                backgroundColor: "rgba(153, 204, 255, 0.2)", // 淡藍色
-                                borderColor: "rgba(153, 204, 255, 1)",
+                                backgroundColor: "rgba(0, 0, 0, 0)",
+                                borderColor: "rgba(0, 104, 255, 1)",
                                 pointRadius: 5,
-                                pointBackgroundColor: "rgba(153, 204, 255, 1)",
+                                pointBackgroundColor: "rgba(0, 104, 255, 1)",
                                 pointBorderColor: "rgba(255, 255, 255, 0.8)",
                                 pointHoverRadius: 5,
                                 pointHoverBackgroundColor: "rgba(153, 204, 255, 1)",
@@ -79,13 +81,28 @@ export default {
                                 }
                             }],
                             yAxes: [{
-                                // ticks: {
-                                //     min: 0,
-                                //     max: 100,
-                                //     maxTicksLimit: 5
-                                // },
+                                id: 'temperature',
+                                position: 'left',
+                                ticks: {
+                                    callback: (value) => value + '°C',
+                                },
+                                scaleLabel: {
+                                    display: true,
+                                    // labelString: 'Temperature'
+                                },
                                 gridLines: {
                                     color: "rgba(0, 0, 0, .125)",
+                                }
+                            },
+                            {
+                                id: 'humidity',
+                                position: 'right',
+                                ticks: {
+                                    callback: (value) => value + '%',
+                                },
+                                scaleLabel: {
+                                    display: true,
+                                    // labelString: 'Humidity'
                                 }
                             }],
                         },

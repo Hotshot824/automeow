@@ -16,5 +16,3 @@ CREATE TABLE DHT22_data
     `lastupdate` DATETIME NOT NULL,
     FOREIGN KEY(`devicename`) REFERENCES device_info(`devicename`)
 );
-
-INSERT INTO `device_info`(`devicename`) VALUES ('DHT22');

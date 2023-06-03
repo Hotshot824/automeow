@@ -19,7 +19,7 @@ defineProps({
 })
 
 const columns = [
-    'ID',
+    'Deivce Name',
     'Data',
     'Position',
     'Online',
@@ -37,7 +37,7 @@ const columns = [
                 </ol>
                 <div class="row">
                     <div class="col-xl-3 col-md-6">
-                        <DHT22_card bg="bg-primary" cardtitle="DHT Sensor Card" />
+                        <DHT22_card bg="bg-primary" cardtitle="DHT Sensor" />
                     </div>
                     <div class="col-xl-3 col-md-6">
                         <card bg="bg-warning" cardtitle="Warning Card" />
@@ -54,6 +54,9 @@ const columns = [
                         <areachart_DHT />
                     </div>
                     <!-- <div class="col-xl-4">
+                        <areachart />
+                    </div>
+                    <div class="col-xl-4">
                         <barchart />
                     </div>
                     <div class="col-xl-4">

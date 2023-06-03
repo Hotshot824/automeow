@@ -15,6 +15,8 @@ defineProps({
 
 const store = useStore();
 
+const device_name = computed(() => store.state.DHT22.device_name);
+const device_position = computed(() => store.state.DHT22.device_position);
 const temperature = computed(() => store.state.DHT22.temperature);
 const humidity = computed(() => store.state.DHT22.humidity);
 const online = computed(() => store.state.DHT22.online);
@@ -24,9 +26,9 @@ const time = computed(() => store.state.DHT22.time);
 <template>
     <tr>
         <!-- Name, Data, Position, Online, Last upload -->
-        <td>{{ id }}</td>
+        <td>{{ device_name }}</td>
         <td>Temperature : {{ temperature }}, Humidity : {{ humidity }}</td>
-        <td>{{ position }}</td>
+        <td>{{ device_position }}</td>
         <td>{{ online ? 'Active' : 'Inactive' }}</td>
         <td>{{ time }}</td>
     </tr>

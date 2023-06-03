@@ -3,6 +3,8 @@ import DHT22 from '../../api/DHT22'
 // initial state
 // shape: [{ id, quantity }]
 const state = () => ({
+    device_name: null,
+    device_position: null,
     temperature: null,
     humidity: null,
     online: null,
@@ -16,8 +18,11 @@ const getters = {
 // actions
 const actions = {
     async getData({ commit }) {
-        let data = await DHT22.getData();
+        const data = await DHT22.fetchDHTdata();
+        console.log(data);
         commit('updateData', {
+            device_name: data.device_name,
+            device_position: data.device_position,
             temperature: data.temperature,
             humidity: data.humidity,
             time: data.time,
@@ -25,7 +30,8 @@ const actions = {
         });
     },
     async toggleDHT({ commit }) {
-        let data = await DHT22.toggleDHT();
+        const data = await DHT22.toggleDHT();
+        console.log(data);
         commit('updateOnline', {
             online: data.online
         });
@@ -35,6 +41,8 @@ const actions = {
 // mutations
 const mutations = {
     updateData(state, payload) {
+        state.device_name = payload.device_name;
+        state.device_position = payload.device_position;
         state.temperature = payload.temperature;
         state.humidity = payload.humidity;
         state.time = payload.time;

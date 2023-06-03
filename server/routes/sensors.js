@@ -7,12 +7,7 @@ router.prefix('/sensors')
 
 router.get('/dht', async (ctx, next) => {
   const data = mqttClient.GetData();
-  ctx.body = {
-    online: data.online,
-    temperature: data.temperature,
-    humidity: data.humidity,
-    time: data.time,
-  }
+  ctx.body = data;
 })
 
 router.get('/dht/history', async (ctx, next) => {
