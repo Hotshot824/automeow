@@ -20,7 +20,19 @@ int port = 1883;
 // Note that a broker allows an individual client to create only on session.
 // If a session is created by another client with same cliend ID, the former one will be disconnected.
 // Thus, each sensor node's client must be different from each other.
-char client_id[] = "automeow-DHT22";
+#define DEVICE_NAME = "DHT22-bedroom"
+#define DEVICE_POSITION = "bedroom"
+char client_id[] = DEVICE_NAME;
+
+void buildINFO(char *info, char *status)
+{
+  strcpy(info, status);
+  strcat(info, ",");
+  strcat(info, DEVICE_NAME);
+  strcat(info, ",");
+  strcat(info, DEVICE_POSITION);
+  strcat(info, ",");
+}
 
 // MQTT topics
 #define TOPIC_INFO "automeow/DHT22/info"
@@ -96,7 +108,9 @@ void reconnect()
     {
       Serial.println("connected");
       // Once connected, publish an announcement...
-      client.publish(TOPIC_INFO, "ON");
+      char info[50];
+      buildInfo(info, "ON");
+      client.publish(TOPIC_INFO, info);
       // ... and resubscribe
       client.subscribe(TOPIC_DHT_CONTROL);
       // ... and resubscribe
@@ -174,7 +188,9 @@ void loop()
       client.publish(TOPIC_TEMPERATURE, buffer);
       Serial.print("Temperature: ");
       Serial.println(buffer);
-      client.publish(TOPIC_INFO, "ON");
+      char info[50];
+      buildInfo(info, "ON");
+      client.publish(TOPIC_INFO, info);
     }
     // update last time value
     temp_last_time = current_time;

@@ -4,11 +4,12 @@ const config = require('../config.json');
 
 class DHT22Client {
     constructor() {
-        this._divicename = 'DHT22'
+        this._device_name;
+        this._device_postition;
 
         this._host = config.mqtt.host;
         this._port = config.mqtt.port;
-        this._pool = pool
+        this._pool = pool;
 
         this._mqtt_opt = {
             port: this._port,
@@ -21,9 +22,11 @@ class DHT22Client {
         this._online;
         this._time;
 
-        this.averageQueue = [];
+        this._averageQueue = [];
         // Average unit =  average count * publish interval = total second (360 * 10 = 3600 sec).
-        this.averageCounter = 6;
+        this._averageCounter = 60;
+        // Data storage in database max day, unit is hours (7 * 24 = 168 hours).
+        this._averageStorageHours = 168;
 
         this._mqttClient.on('connect', this._handleConnect.bind(this));
         this._mqttClient.on('message', this._handleMessage.bind(this));
@@ -31,8 +34,18 @@ class DHT22Client {
         this._startCheckDevice();
     }
 
+    async _registerDevice() {
+        const sql = "SELECT * FROM `device_info` WHERE `devicename` = ?;";
+        const values = [this._device_name]
+        const promisePool = this._pool.promise();
+        const [rows, fields] = await promisePool.query(sql, values);
+        if (rows.length < 1) {
+            this._pool.query("INSERT INTO `device_info`(`devicename`) VALUES (?);", values)
+        }
+    }
+
     _averageQueueIsFull() {
-        if (this.averageQueue.length == this.averageCounter-1) {
+        if (this._averageQueue.length == this._averageCounter) {
             return true;
         } else {
             return false;
@@ -40,15 +53,17 @@ class DHT22Client {
     }
 
     _cleanQueue() {
-        this.averageQueue = []
+        let lastData = this._averageQueue[this._averageQueue.length - 1]
+        this._averageQueue = []
+        this._averageQueue.push(lastData)
     }
 
     _averageCauculate() {
-        let length = this.averageQueue.length
-        let sum = this.averageQueue.reduce((acc, curr) => {
+        let length = this._averageQueue.length
+        let sum = this._averageQueue.reduce((acc, curr) => {
             let t = curr[0], h = curr[1];
             // Does not count if sensor is wrong
-            if (t == 0 && t > 40 && h == 0) {
+            if (t == 0 || t > 40 || h == 0) {
                 length--;
                 return acc;
             }
@@ -56,15 +71,14 @@ class DHT22Client {
             acc[1] += h;
             return acc
         }, [0, 0]);
-        console.log(sum, this._time);
         return {
-            'ave_temperature': (sum[0]/length).toFixed(2),
-            'ave_humidity': (sum[1]/length).toFixed(2)
+            'ave_temperature': (sum[0] / length).toFixed(2),
+            'ave_humidity': (sum[1] / length).toFixed(2)
         }
     }
 
     _handleConnect() {
-        console.log('DHT22 module connection to mqtt server!');
+        console.log('[Sensor module] DHT22 module connection to mqtt server!');
         this._mqttClient.subscribe('automeow/DHT22/temperature');
         this._mqttClient.subscribe('automeow/DHT22/humidity');
         this._mqttClient.subscribe('automeow/DHT22/info');
@@ -81,10 +95,15 @@ class DHT22Client {
                 this._time = this._updateCurrentTime();
                 break;
             case 'automeow/DHT22/info':
-                this._online = msg.toString();
+                const [online, device_name, device_position] = msg.toString().split(',');
+                this._online = online;
+                this._device_name = device_name;
+                this._device_postition = device_position;
+                this._registerDevice();
+                // if drivce is live and queue is full, storage data to database.
                 if (this._online == 'ON' && this._averageQueueIsFull()) {
                     const average = this._averageCauculate();
-                    const devicename = this._divicename;
+                    const devicename = this._device_name;
                     const humidity = average.ave_humidity;
                     const temperature = average.ave_temperature;
                     const time = this._time;
@@ -100,7 +119,7 @@ class DHT22Client {
 
                     this._cleanQueue()
                 } else {
-                    this.averageQueue.push([this._temperature, this._humidity])
+                    this._averageQueue.push([this._temperature, this._humidity])
                 }
 
                 break;
@@ -121,6 +140,7 @@ class DHT22Client {
         return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
     }
 
+    // Check if the device is online every 30 seconds
     _startCheckDevice() {
         setInterval(() => {
             let currentTime = this._updateCurrentTime();
@@ -133,11 +153,35 @@ class DHT22Client {
 
     GetData() {
         return {
+            "device_name": this._device_name,
+            "device_position": this._device_postition,
             "online": this._online,
             "temperature": this._temperature,
             "humidity": this._humidity,
             "time": this._time,
         }
+    }
+
+    async GetHistoryData() {
+        ((divicename, storageHours) => {
+            const dateOut = new Date();
+            dateOut.setHours(dateOut.getHours() - storageHours);
+            pool.getConnection(function (err, conn) {
+
+                const sql = `DELETE FROM DHT22_data WHERE devicename = ? AND lastupdate < ?`;
+                const values = [divicename, dateOut];
+                // Do something with the connection
+                conn.query(sql, values);
+                // Don't forget to release the connection when finished!
+                pool.releaseConnection(conn);
+            })
+        })(this._device_name, this._averageStorageHours);
+
+        const sql = "SELECT * FROM `DHT22_data` WHERE `devicename` = ? ORDER BY `lastupdate` DESC LIMIT 24";
+        const values = [this._device_name]
+        const promisePool = this._pool.promise();
+        const [rows, fields] = await promisePool.query(sql, values);
+        return rows;
     }
 
     Toggle() {

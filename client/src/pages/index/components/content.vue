@@ -1,5 +1,6 @@
 <script setup>
 import datatable from './datatable.vue'
+import areachart_DHT from './charts/areachart_DHT.vue'
 import areachart from './charts/areachart.vue'
 import barchart from './charts/barchart.vue'
 import piechart from './charts/piechart.vue'
@@ -18,7 +19,7 @@ defineProps({
 })
 
 const columns = [
-    'ID',
+    'Deivce Name',
     'Data',
     'Position',
     'Online',
@@ -36,7 +37,7 @@ const columns = [
                 </ol>
                 <div class="row">
                     <div class="col-xl-3 col-md-6">
-                        <DHT22_card bg="bg-primary" cardtitle="DHT Sensor Card" />
+                        <DHT22_card bg="bg-primary" cardtitle="DHT Sensor" />
                     </div>
                     <div class="col-xl-3 col-md-6">
                         <card bg="bg-warning" cardtitle="Warning Card" />
@@ -49,7 +50,10 @@ const columns = [
                     </div>
                 </div>
                 <div class="row">
-                    <div class="col-xl-4">
+                    <div class="col-xl-12">
+                        <areachart_DHT />
+                    </div>
+                    <!-- <div class="col-xl-4">
                         <areachart />
                     </div>
                     <div class="col-xl-4">
@@ -57,7 +61,7 @@ const columns = [
                     </div>
                     <div class="col-xl-4">
                         <piechart />
-                    </div>
+                    </div> -->
                 </div>
                 <datatable v-bind:columns="columns" />
             </div>

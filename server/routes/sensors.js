@@ -6,12 +6,14 @@ const mqttClient = new DHT22Client();
 router.prefix('/sensors')
 
 router.get('/dht', async (ctx, next) => {
-  let data = mqttClient.GetData();
+  const data = mqttClient.GetData();
+  ctx.body = data;
+})
+
+router.get('/dht/history', async (ctx, next) => {
+  const data = await mqttClient.GetHistoryData();
   ctx.body = {
-    online: data.online,
-    temperature: data.temperature,
-    humidity: data.humidity,
-    time: data.time,
+    history: data,
   }
 })
 

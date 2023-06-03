@@ -18,7 +18,17 @@ const store = useStore();
 const online = computed(() => store.state.DHT22.online);
 
 const handleButtonClick = () => {
-  store.dispatch('DHT22/toggleDHT');
+  console.log(online.value);
+  let confirmation;
+  if (online.value) {
+    confirmation = window.confirm("Turn OFF the sensor?");
+  } else {
+    confirmation = window.confirm("Turn ON the sensor?");
+  }
+  
+  if (confirmation) {
+    store.dispatch('DHT22/toggleDHT');
+  }
 };
 
 function getData() {

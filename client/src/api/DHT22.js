@@ -1,23 +1,25 @@
-var temperature = "", humidity = "", time = "", online = false
 async function fetchDHTdata() {
-    await fetch('/api/sensors/dht')
-        .then(response => response.json())
-        .then(data => {
-            console.log(data);
-            temperature = parseFloat(data.temperature).toFixed(2);
-            humidity = parseFloat(data.humidity).toFixed(2);
-            time = data.time;
-            if (data.online == 'ON') {
-                online = true;
-            } else {
-                online = false;
-            }
-        })
-        .catch(error => {
-            online = false;
-            console.log(error);
-        })
+    try {
+        const response = await fetch('/api/sensors/dht')
+        let data = await response.json();
+        data.temperature = parseFloat(data.temperature).toFixed(2);
+        data.humidity = parseFloat(data.humidity).toFixed(2);
+        if (data.online == 'ON') {
+            data.online = true;
+        } else {
+            data.online = false;
+        }
+        return data;
+    } catch (error) {
+        console.log(error);
+        return { online: false };
+    }
 }
+
+function fetchDHTHistoryData() {
+    return fetch('/api/sensors/dht/history');
+}
+
 
 async function fetchToggleDHT() {
     let data = {
@@ -35,10 +37,11 @@ async function fetchToggleDHT() {
         .then(data => {
             // console.log(data);
             if (data.online == 'ON') {
-                online = true;
+                data.online = true;
             } else {
-                online = false;
+                data.online = false;
             }
+            return data;
         })
         .catch(error => {
             console.log(error);
@@ -46,19 +49,7 @@ async function fetchToggleDHT() {
 }
 
 export default {
-    async getData() {
-        await fetchDHTdata();
-        return {
-            "temperature": temperature,
-            "humidity": humidity,
-            "time": time,
-            "online": online
-        }
-    },
-    async toggleDHT() {
-        await fetchToggleDHT();
-        return {
-            "online": online
-        }
-    }
+    fetchDHTdata,
+    fetchToggleDHT,
+    fetchDHTHistoryData,
 }
