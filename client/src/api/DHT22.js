@@ -19,6 +19,11 @@ async function fetchDHTdata() {
         })
 }
 
+function fetchDHTHistoryData() {
+    return fetch('/api/sensors/dht/history');
+}
+
+
 async function fetchToggleDHT() {
     let data = {
         topic: 'automeow/DHT22/controlDHT',
@@ -60,5 +65,6 @@ export default {
         return {
             "online": online
         }
-    }
+    },
+    fetchDHTHistoryData,
 }

@@ -23,7 +23,7 @@ class DHT22Client {
 
         this.averageQueue = [];
         // Average unit =  average count * publish interval = total second (360 * 10 = 3600 sec).
-        this.averageCounter = 6;
+        this.averageCounter = 360;
 
         this._mqttClient.on('connect', this._handleConnect.bind(this));
         this._mqttClient.on('message', this._handleMessage.bind(this));
@@ -32,7 +32,7 @@ class DHT22Client {
     }
 
     _averageQueueIsFull() {
-        if (this.averageQueue.length == this.averageCounter-1) {
+        if (this.averageQueue.length == this.averageCounter - 1) {
             return true;
         } else {
             return false;
@@ -58,8 +58,8 @@ class DHT22Client {
         }, [0, 0]);
         console.log(sum, this._time);
         return {
-            'ave_temperature': (sum[0]/length).toFixed(2),
-            'ave_humidity': (sum[1]/length).toFixed(2)
+            'ave_temperature': (sum[0] / length).toFixed(2),
+            'ave_humidity': (sum[1] / length).toFixed(2)
         }
     }
 
@@ -82,6 +82,7 @@ class DHT22Client {
                 break;
             case 'automeow/DHT22/info':
                 this._online = msg.toString();
+                // if drivce is live and queue is full, storage data to database.
                 if (this._online == 'ON' && this._averageQueueIsFull()) {
                     const average = this._averageCauculate();
                     const devicename = this._divicename;
@@ -121,6 +122,7 @@ class DHT22Client {
         return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
     }
 
+    // Check if the device is online every 30 seconds
     _startCheckDevice() {
         setInterval(() => {
             let currentTime = this._updateCurrentTime();
@@ -138,6 +140,14 @@ class DHT22Client {
             "humidity": this._humidity,
             "time": this._time,
         }
+    }
+
+    async GetHistoryData() {
+        const sql = "SELECT * FROM `DHT22_data` WHERE `devicename` = ? ORDER BY `lastupdate`";
+        const values = [this._divicename]
+        const promisePool = this._pool.promise();
+        const [rows, fields] = await promisePool.query(sql, values);
+        return rows;
     }
 
     Toggle() {
