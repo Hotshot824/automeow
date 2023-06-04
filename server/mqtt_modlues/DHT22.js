@@ -1,15 +1,15 @@
+const SensorModuleBase = require('./base');
 const mqtt = require('mqtt');
-const pool = require('../mysql')
 const config = require('../config.json');
 
-class DHT22Client {
+class DHT22Client extends SensorModuleBase {
     constructor() {
+        super();
         this._device_name;
         this._device_postition;
 
         this._host = config.mqtt.host;
         this._port = config.mqtt.port;
-        this._pool = pool;
 
         this._mqtt_opt = {
             port: this._port,
@@ -24,7 +24,7 @@ class DHT22Client {
 
         this._averageQueue = [];
         // Average unit =  average count * publish interval = total second (360 * 10 = 3600 sec).
-        this._averageCounter = 60;
+        this._averageCounter = 360;
         // Data storage in database max day, unit is hours (7 * 24 = 168 hours).
         this._averageStorageHours = 168;
 
@@ -32,16 +32,6 @@ class DHT22Client {
         this._mqttClient.on('message', this._handleMessage.bind(this));
 
         this._startCheckDevice();
-    }
-
-    async _registerDevice() {
-        const sql = "SELECT * FROM `device_info` WHERE `devicename` = ?;";
-        const values = [this._device_name]
-        const promisePool = this._pool.promise();
-        const [rows, fields] = await promisePool.query(sql, values);
-        if (rows.length < 1) {
-            this._pool.query("INSERT INTO `device_info`(`devicename`) VALUES (?);", values)
-        }
     }
 
     _averageQueueIsFull() {
@@ -99,7 +89,7 @@ class DHT22Client {
                 this._online = online;
                 this._device_name = device_name;
                 this._device_postition = device_position;
-                this._registerDevice();
+                this._registerDevice(this._device_name);
                 // if drivce is live and queue is full, storage data to database.
                 if (this._online == 'ON' && this._averageQueueIsFull()) {
                     const average = this._averageCauculate();
@@ -108,7 +98,7 @@ class DHT22Client {
                     const temperature = average.ave_temperature;
                     const time = this._time;
 
-                    pool.getConnection(function (err, conn) {
+                    this._pool.getConnection(function (err, conn) {
                         const sql = 'INSERT INTO DHT22_data (devicename, humidity, temperature, lastupdate) VALUES (?, ?, ?, ?)';
                         const values = [devicename, humidity, temperature, time];
                         // Do something with the connection
@@ -127,17 +117,6 @@ class DHT22Client {
                 console.log('Error!');
                 break;
         }
-    }
-
-    _updateCurrentTime() {
-        const now = new Date();
-        const year = now.getFullYear();
-        const month = (now.getMonth() + 1).toString().padStart(2, '0');
-        const day = now.getDate().toString().padStart(2, '0');
-        const hours = now.getHours().toString().padStart(2, '0');
-        const minutes = now.getMinutes().toString().padStart(2, '0');
-        const seconds = now.getSeconds().toString().padStart(2, '0');
-        return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
     }
 
     // Check if the device is online every 30 seconds
@@ -165,6 +144,7 @@ class DHT22Client {
     async GetHistoryData() {
         ((divicename, storageHours) => {
             const dateOut = new Date();
+            const pool = this._pool;
             dateOut.setHours(dateOut.getHours() - storageHours);
             pool.getConnection(function (err, conn) {
 
@@ -186,10 +166,10 @@ class DHT22Client {
 
     Toggle() {
         if (this._online == 'ON') {
-            this._mqttClient.publish('automeow/DHT22/controlDHT', "0");
+            this._mqttClient.publish('automeow/DHT22/control', "0");
             this._online = 'OFF';
         } else {
-            this._mqttClient.publish('automeow/DHT22/controlDHT', "1");
+            this._mqttClient.publish('automeow/DHT22/control', "1");
             this._online = 'ON';
         }
         return this._online

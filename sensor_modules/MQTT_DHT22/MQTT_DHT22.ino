@@ -20,13 +20,13 @@ int port = 1883;
 // Note that a broker allows an individual client to create only on session.
 // If a session is created by another client with same cliend ID, the former one will be disconnected.
 // Thus, each sensor node's client must be different from each other.
-#define DEVICE_NAME = "DHT22-bedroom"
-#define DEVICE_POSITION = "bedroom"
+#define DEVICE_NAME "DHT22-bedroom"
+#define DEVICE_POSITION "bedroom"
 char client_id[] = DEVICE_NAME;
 
-void buildINFO(char *info, char *status)
+void buildInfo(char *info, char *s)
 {
-  strcpy(info, status);
+  strcpy(info, s);
   strcat(info, ",");
   strcat(info, DEVICE_NAME);
   strcat(info, ",");
@@ -38,7 +38,7 @@ void buildINFO(char *info, char *status)
 #define TOPIC_INFO "automeow/DHT22/info"
 #define TOPIC_HUMIDITY "automeow/DHT22/humidity"
 #define TOPIC_TEMPERATURE "automeow/DHT22/temperature"
-#define TOPIC_DHT_CONTROL "automeow/DHT22/controlDHT"
+#define TOPIC_CONTROL "automeow/DHT22/control"
 
 // Clients for MQTT
 WiFiClient wifiClient;
@@ -52,10 +52,10 @@ unsigned long temp_last_time;
 #define LED_PIN LED_BUILTIN
 typedef enum
 {
-  DHT_OFF = 0,
-  DHT_ON,
-} LEDStatus;
-LEDStatus dht_status = DHT_ON;
+  DEVICE_OFF = 0,
+  DEVICE_ON,
+} Status;
+Status device_status = DEVICE_ON;
 
 void led_on()
 {
@@ -80,15 +80,15 @@ void callback(char *topic, byte *payload, unsigned int length)
   Serial.println();
 
   // If LED Control command is incoming, change LED status
-  if (!strcmp(topic, TOPIC_DHT_CONTROL))
+  if (!strcmp(topic, TOPIC_CONTROL))
   {
     switch (payload[0])
     {
     case '0':
-      dht_status = DHT_OFF;
+      device_status = DEVICE_OFF;
       break;
     case '1':
-      dht_status = DHT_ON;
+      device_status = DEVICE_ON;
       break;
     default:
     {
@@ -112,7 +112,7 @@ void reconnect()
       buildInfo(info, "ON");
       client.publish(TOPIC_INFO, info);
       // ... and resubscribe
-      client.subscribe(TOPIC_DHT_CONTROL);
+      client.subscribe(TOPIC_CONTROL);
       // ... and resubscribe
     }
     else
@@ -168,9 +168,11 @@ void loop()
   current_time = millis();
   if (DHT_read_interval < (current_time - temp_last_time))
   {
-    if (dht_status == DHT_OFF)
+    if (device_status == DEVICE_OFF)
     {
-      client.publish(TOPIC_INFO, "OFF");
+      char info[50];
+      buildInfo(info, "OFF");
+      client.publish(TOPIC_INFO, info);
     }
     else
     {
@@ -196,13 +198,13 @@ void loop()
     temp_last_time = current_time;
   }
 
-  // Control LED according to dht_status
-  switch (dht_status)
+  // Control LED according to device_status
+  switch (device_status)
   {
-  case DHT_OFF:
+  case DEVICE_OFF:
     led_off();
     break;
-  case DHT_ON:
+  case DEVICE_ON:
     led_on();
     break;
   default:
