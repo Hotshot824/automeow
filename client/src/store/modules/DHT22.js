@@ -19,7 +19,7 @@ const getters = {
 const actions = {
     async getData({ commit }) {
         const data = await DHT22.fetchDHTdata();
-        console.log(data);
+        // console.log(data);
         commit('updateData', {
             device_name: data.device_name,
             device_position: data.device_position,
@@ -30,8 +30,8 @@ const actions = {
         });
     },
     async toggleDHT({ commit }) {
-        const data = await DHT22.toggleDHT();
-        console.log(data);
+        const data = await DHT22.fetchToggleDHT();
+        // console.log(data);
         commit('updateOnline', {
             online: data.online
         });

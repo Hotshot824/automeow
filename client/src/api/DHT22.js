@@ -22,30 +22,28 @@ function fetchDHTHistoryData() {
 
 
 async function fetchToggleDHT() {
-    let data = {
-        topic: 'automeow/DHT22/controlDHT',
-        control: true
+    try {
+        let body = {
+            topic: 'automeow/DHT22/control',
+        }
+        const response = await fetch('/api/sensors/dht/control', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(body)
+        })
+        let data = await response.json();
+        if (data.online == 'ON') {
+            data.online = true;
+        } else {
+            data.online = false;
+        }
+        return data
+    } catch (error) {
+        console.log(error);
+        return { online: false };
     }
-    await fetch('/api/sensors/dht/control', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(data)
-    })
-        .then(response => response.json())
-        .then(data => {
-            // console.log(data);
-            if (data.online == 'ON') {
-                data.online = true;
-            } else {
-                data.online = false;
-            }
-            return data;
-        })
-        .catch(error => {
-            console.log(error);
-        })
 }
 
 export default {

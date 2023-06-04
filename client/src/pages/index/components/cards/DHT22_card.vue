@@ -18,7 +18,6 @@ const store = useStore();
 const online = computed(() => store.state.DHT22.online);
 
 const handleButtonClick = () => {
-  console.log(online.value);
   let confirmation;
   if (online.value) {
     confirmation = window.confirm("Turn OFF the sensor?");
