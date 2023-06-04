@@ -1,9 +1,7 @@
 async function fetchData() {
     try {
-        const response = await fetch('/api/sensors/dht')
+        const response = await fetch('/api/sensors/feeder')
         let data = await response.json();
-        data.temperature = parseFloat(data.temperature).toFixed(2);
-        data.humidity = parseFloat(data.humidity).toFixed(2);
         if (data.online == 'ON') {
             data.online = true;
         } else {
@@ -16,15 +14,35 @@ async function fetchData() {
     }
 }
 
-function fetchDHTHistoryData() {
-    return fetch('/api/sensors/dht/history');
-}
-
-
 async function fetchToggle() {
     try {
         let body = {
-            topic: 'automeow/DHT22/control',
+            topic: 'automeow/feeder/control',
+        }
+        const response = await fetch('/api/sensors/control', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(body)
+        })
+        let data = await response.json();
+        if (data.online == 'ON') {
+            data.online = true;
+        } else {
+            data.online = false;
+        }
+        return data
+    } catch (error) {
+        console.log(error);
+        return { online: false };
+    }
+}
+
+async function fetchToFeed() {
+    try {
+        let body = {
+            topic: 'automeow/feeder/control/tofeed',
         }
         const response = await fetch('/api/sensors/control', {
             method: 'POST',
@@ -49,5 +67,5 @@ async function fetchToggle() {
 export default {
     fetchData,
     fetchToggle,
-    fetchDHTHistoryData,
+    fetchToFeed,
 }

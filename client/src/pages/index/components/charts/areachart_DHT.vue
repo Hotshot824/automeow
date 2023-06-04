@@ -119,9 +119,11 @@ export default {
 };
 </script>
 
+<!-- 13, 110, 253 -->
+
 <template>
     <div class="card mb-4">
-        <div class="card-header">
+        <div class="card-header bg-primary text-white">
             <i class="fas fa-chart-area me-1"></i>
             Temperature and Humidity History
         </div>
@@ -129,4 +131,6 @@ export default {
     </div>
 </template>
 
-<style></style>
+<style>
+
+</style>
