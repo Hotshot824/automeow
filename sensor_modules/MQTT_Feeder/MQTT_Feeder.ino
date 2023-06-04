@@ -9,13 +9,13 @@ Servo myservo; // create servo object to control a servo
 int pos = 0; // variable to store the servo position
 
 // WiFi AP ssid / password here
-char ssid[] = "SSID";     //  your network SSID (name)
+char ssid[] = "SSID";    //  your network SSID (name)
 char pass[] = "PASSWORD"; // your network password (use for WPA, or use as key for WEP)
 
 // MQTT Broker info
 // IPAddress server(192, 168, 1, 182);
 char server[] = "MQTT SERVER";
-int port = 1883;
+int port = 20083;
 
 // MQTT Client info
 // Client ID.
@@ -27,8 +27,8 @@ int port = 1883;
 char client_id[] = DEVICE_NAME;
 
 // MQTT topics
-#define TOPIC_INFO "automeow/Feeder/info"
-#define TOPIC_CONTROL "automeow/Feeder/control"
+#define TOPIC_INFO "automeow/feeder/info"
+#define TOPIC_CONTROL "automeow/feeder/control"
 
 void buildInfo(char *info, char *status)
 {
@@ -140,7 +140,9 @@ void setup()
 {
     // setup Serial output at 9600
     Serial.begin(9600);
-    myservo.attach(SERVO_PIN); // attaches the servo on pin 10 to the servo object
+
+    // initialization servo
+    initServo();
 
     // Set MQTT broker
     client.setServer(server, port);
@@ -193,17 +195,21 @@ void loop()
 
     if (to_feed == FEEDER_ON)
     {
-        for (pos = 0; pos <= 90; pos += 3)
+        myservo.attach(SERVO_PIN);
+        for (pos = 0; pos <= 90; pos += 1)
         { // goes from 0 degrees to 180 degrees
             // in steps of 1 degree
             myservo.write(pos); // tell servo to go to position in variable 'pos'
+            delay(15); // waits 15ms for the servo to reach the position
         }
-        delay(15); // waits 15ms for the servo to reach the position
-        for (pos = 90; pos >= 0; pos -= 3)
+        for (pos = 90; pos >= 0; pos -= 1)
         {                       // goes from 180 degrees to 0 degrees
             myservo.write(pos); // tell servo to go to position in variable 'pos'
+            delay(15); // waits 15ms for the servo to reach the position
         }
         to_feed = FEEDER_OFF;
+        delay(1000);
+        myservo.detach();
     }
 
     // Control LED according to dht_status
@@ -221,6 +227,14 @@ void loop()
     }
 
     client.loop();
+}
+
+void initServo()
+{
+    myservo.attach(SERVO_PIN); // attaches the servo on pin 10 to the servo object
+    myservo.write(pos); // tell servo to go to position in variable 'pos'
+    delay(1000);
+    myservo.detach();
 }
 
 void printWifiStatus()

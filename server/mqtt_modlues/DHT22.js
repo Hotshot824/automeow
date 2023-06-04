@@ -92,13 +92,14 @@ class DHT22Client extends SensorModuleBase {
                 this._registerDevice(this._device_name);
                 // if drivce is live and queue is full, storage data to database.
                 if (this._online == 'ON' && this._averageQueueIsFull()) {
+                    const pool = this._pool;
                     const average = this._averageCauculate();
                     const devicename = this._device_name;
                     const humidity = average.ave_humidity;
                     const temperature = average.ave_temperature;
                     const time = this._time;
 
-                    this._pool.getConnection(function (err, conn) {
+                    pool.getConnection(function (err, conn) {
                         const sql = 'INSERT INTO DHT22_data (devicename, humidity, temperature, lastupdate) VALUES (?, ?, ?, ?)';
                         const values = [devicename, humidity, temperature, time];
                         // Do something with the connection
@@ -124,10 +125,11 @@ class DHT22Client extends SensorModuleBase {
         setInterval(() => {
             let currentTime = this._updateCurrentTime();
             let timeDiffInSeconds = Math.abs(new Date(currentTime) - new Date(this._time)) / 1000;
-            if (timeDiffInSeconds >= 30) {
+            console.log(timeDiffInSeconds);
+            if (timeDiffInSeconds >= 30 || !timeDiffInSeconds) {
                 this._online = 'OFF';
             }
-        }, 30000);
+        }, 10000);
     }
 
     GetData() {

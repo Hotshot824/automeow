@@ -21,6 +21,13 @@ const temperature = computed(() => store.state.DHT22.temperature);
 const humidity = computed(() => store.state.DHT22.humidity);
 const online = computed(() => store.state.DHT22.online);
 const time = computed(() => store.state.DHT22.time);
+
+function getData() {
+    store.dispatch('DHT22/getData');
+}
+
+getData();
+setInterval(getData, 10000);
 </script>
 
 <template>
