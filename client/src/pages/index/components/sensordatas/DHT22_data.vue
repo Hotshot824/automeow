@@ -3,14 +3,14 @@ import { computed } from 'vue';
 import { useStore } from 'vuex';
 
 defineProps({
-    id: {
-      type: String,
-      default: 'Unknown'
-    },
-    position: {
-      type: String,
-      default: 'Unknown'
-    },
+  id: {
+    type: String,
+    default: 'Unknown'
+  },
+  position: {
+    type: String,
+    default: 'Unknown'
+  },
 })
 
 const store = useStore();
@@ -23,7 +23,7 @@ const online = computed(() => store.state.DHT22.online);
 const time = computed(() => store.state.DHT22.time);
 
 function getData() {
-    store.dispatch('DHT22/getData');
+  store.dispatch('DHT22/getData');
 }
 
 getData();
@@ -31,14 +31,18 @@ setInterval(getData, 10000);
 </script>
 
 <template>
+  <template v-if="!isNaN(temperature) && !isNaN(humidity)">
     <tr>
-        <!-- Name, Data, Position, Online, Last upload -->
-        <td>{{ device_name }}</td>
-        <td>Temperature : {{ temperature }}, Humidity : {{ humidity }}</td>
-        <td>{{ device_position }}</td>
-        <td>{{ online ? 'Active' : 'Inactive' }}</td>
-        <td>{{ time }}</td>
+      <!-- Name, Data, Position, Online, Last upload -->
+      <td>{{ device_name }}</td>
+      <td>
+        Temperature : {{ temperature }}, Humidity : {{ humidity }}
+      </td>
+      <td>{{ device_position }}</td>
+      <td>{{ online ? 'Active' : 'Inactive' }}</td>
+      <td>{{ time }}</td>
     </tr>
+  </template>
 </template>
 
 <style></style>

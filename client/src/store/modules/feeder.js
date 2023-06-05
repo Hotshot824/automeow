@@ -5,6 +5,7 @@ import feeder from '../../api/feeder'
 const state = () => ({
     device_name: null,
     device_position: null,
+    distance: null,
     online: null,
     time: null,
 })
@@ -21,6 +22,7 @@ const actions = {
         commit('updateData', {
             device_name: data.device_name,
             device_position: data.device_position,
+            distance: data.distance,
             time: data.time,
             online: data.online
         });
@@ -42,6 +44,7 @@ const mutations = {
     updateData(state, payload) {
         state.device_name = payload.device_name;
         state.device_position = payload.device_position;
+        state.distance = payload.distance,
         state.time = payload.time;
         state.online = payload.online;
     },
