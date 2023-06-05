@@ -43,7 +43,8 @@ window.addEventListener('DOMContentLoaded', event => {
                     </tr>
                 </tfoot>
                 <tbody>
-                    <component :is="components.DHT22_data" id="DHT Sensor" position="Bedroom"/>
+                    <component :is="components.DHT22_data"/>
+                    <component :is="components.feeder_data"/>
                 </tbody>
             </table>
         </div>

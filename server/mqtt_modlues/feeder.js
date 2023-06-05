@@ -2,7 +2,7 @@ const SensorModuleBase = require('./base');
 const mqtt = require('mqtt');
 const config = require('../config.json');
 
-class FeederClient extends SensorModuleBase {
+class feederClient extends SensorModuleBase {
     constructor() {
         super();
         this._host = config.mqtt.host;
@@ -14,6 +14,7 @@ class FeederClient extends SensorModuleBase {
         };
 
         this._mqttClient = mqtt.connect(this._host, this._mqtt_opt);
+        this._distance
         this._online;
         this._time;
 
@@ -25,12 +26,13 @@ class FeederClient extends SensorModuleBase {
 
     _handleConnect() {
         console.log('[Sensor module] Feeder module connection to mqtt server!');
-        this._mqttClient.subscribe('automeow/Feeder/info');
+        this._mqttClient.subscribe('automeow/feeder/info');
+        this._mqttClient.subscribe('automeow/feeder/distance');
     }
 
     _handleMessage(topic, msg) {
         switch (topic) {
-            case 'automeow/Feeder/info':
+            case 'automeow/feeder/info':
                 const [online, device_name, device_position] = msg.toString().split(',');
                 this._device_name = device_name;
                 this._device_postition = device_position;
@@ -38,12 +40,15 @@ class FeederClient extends SensorModuleBase {
                 this._time = this._updateCurrentTime();
                 this._registerDevice(this._device_name);
                 break;
+            case 'automeow/feeder/distance':
+                this._distance = msg.toString();
+                break;
             default:
                 console.log('Error!');
                 break;
         }
     }
-    
+
     // Check if the device is online every 30 seconds
     _startCheckDevice() {
         setInterval(() => {
@@ -55,6 +60,31 @@ class FeederClient extends SensorModuleBase {
         }, 30000);
     }
 
+    GetData() {
+        return {
+            "device_name": this._device_name,
+            "device_position": this._device_postition,
+            "distance": this._distance,
+            "online": this._online,
+            "time": this._time,
+        }
+    }
+
+    Toggle() {
+        if (this._online == 'ON') {
+            this._mqttClient.publish('automeow/feeder/control', "0");
+            this._online = 'OFF';
+        } else {
+            this._mqttClient.publish('automeow/feeder/control', "1");
+            this._online = 'ON';
+        }
+        return this._online
+    }
+
+    ToFeed() {
+        this._mqttClient.publish('automeow/feeder/control', "2");
+    }
+
 }
 
-module.exports = FeederClient;
+module.exports = feederClient;

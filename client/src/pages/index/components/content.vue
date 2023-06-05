@@ -5,7 +5,7 @@ import areachart from './charts/areachart.vue'
 import barchart from './charts/barchart.vue'
 import piechart from './charts/piechart.vue'
 import card from './cards/card.vue'
-import DHT22_card from './cards/DHT22_card.vue'
+import { components } from './cards'
 
 defineProps({
     title: {
@@ -37,13 +37,13 @@ const columns = [
                 </ol>
                 <div class="row">
                     <div class="col-xl-3 col-md-6">
-                        <DHT22_card bg="bg-primary" cardtitle="DHT Sensor" />
+                        <component :is="components.DHT22_card" bg="bg-primary" cardtitle="DHT Sensor"/>
+                    </div>
+                    <div class="col-xl-3 col-md-6">
+                        <component :is="components.feeder_card" bg="bg-success" cardtitle="Feeder"/>
                     </div>
                     <div class="col-xl-3 col-md-6">
                         <card bg="bg-warning" cardtitle="Warning Card" />
-                    </div>
-                    <div class="col-xl-3 col-md-6">
-                        <card bg="bg-success" cardtitle="Success Card" />
                     </div>
                     <div class="col-xl-3 col-md-6">
                         <card bg="bg-danger" cardtitle="Danger Card" />
