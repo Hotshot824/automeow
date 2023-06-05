@@ -1,6 +1,8 @@
 #include <LWiFi.h>
 #include <PubSubClient.h>
 #include <Servo.h>
+#include <Wire.h>
+#include "vl53l0x.h"
 
 Servo myservo; // create servo object to control a servo
 // twelve servo objects can be created on most boards
@@ -15,7 +17,7 @@ char pass[] = "PASSWORD"; // your network password (use for WPA, or use as key f
 // MQTT Broker info
 // IPAddress server(192, 168, 1, 182);
 char server[] = "MQTT SERVER";
-int port = 20083;
+int port = 1883;
 
 // MQTT Client info
 // Client ID.
@@ -28,6 +30,7 @@ char client_id[] = DEVICE_NAME;
 
 // MQTT topics
 #define TOPIC_INFO "automeow/feeder/info"
+#define TOPIC_DISTANCE "automeow/feeder/distance"
 #define TOPIC_CONTROL "automeow/feeder/control"
 
 void buildInfo(char *info, char *status)
@@ -138,6 +141,7 @@ void reconnect()
 
 void setup()
 {
+    Wire.begin(); 
     // setup Serial output at 9600
     Serial.begin(9600);
 
@@ -185,6 +189,10 @@ void loop()
         }
         else
         {
+            char dist[10];
+            sprintf(dist, "%d", read_dist());
+            Serial.println(dist);
+            client.publish(TOPIC_DISTANCE, dist);
             char info[50];
             buildInfo(info, "ON");
             client.publish(TOPIC_INFO, info);
@@ -193,7 +201,7 @@ void loop()
         temp_last_time = current_time;
     }
 
-    if (to_feed == FEEDER_ON)
+    if (to_feed == FEEDER_ON && device_status == DEVICE_ON)
     {
         myservo.attach(SERVO_PIN);
         for (pos = 0; pos <= 90; pos += 1)

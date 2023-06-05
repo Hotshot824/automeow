@@ -125,11 +125,10 @@ class DHT22Client extends SensorModuleBase {
         setInterval(() => {
             let currentTime = this._updateCurrentTime();
             let timeDiffInSeconds = Math.abs(new Date(currentTime) - new Date(this._time)) / 1000;
-            console.log(timeDiffInSeconds);
             if (timeDiffInSeconds >= 30 || !timeDiffInSeconds) {
                 this._online = 'OFF';
             }
-        }, 10000);
+        }, 30000);
     }
 
     GetData() {

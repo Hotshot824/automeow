@@ -7,6 +7,7 @@ async function fetchData() {
         } else {
             data.online = false;
         }
+        console.log(data);
         return data;
     } catch (error) {
         console.log(error);
