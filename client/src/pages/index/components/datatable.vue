@@ -3,14 +3,14 @@ import { components } from './sensordatas'
 
 defineProps({
     tabletitle: {
-      type: String,
-      default: 'Sensor Data Table'
+        type: String,
+        default: 'Sensor Data Table'
     },
     columns: {
-    type: Array,
-    default: () => [
-    ]
-  }
+        type: Array,
+        default: () => [
+        ]
+    }
 })
 
 window.addEventListener('DOMContentLoaded', event => {
@@ -43,13 +43,17 @@ window.addEventListener('DOMContentLoaded', event => {
                     </tr>
                 </tfoot>
                 <tbody>
-                    <component :is="components.DHT22_data"/>
-                    <component :is="components.feeder_data"/>
+                    <component :is="components.environment_data" />
+                    <!-- <component :is="components.feeder_data"/> -->
                 </tbody>
             </table>
         </div>
     </div>
 </template>
 
-<style></style>
+<style>
+table#datatablesSimple th:nth-child(2) {
+    width: 40%;
+}
+</style>
   
