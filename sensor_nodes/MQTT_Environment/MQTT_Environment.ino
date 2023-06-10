@@ -104,11 +104,11 @@ void handleCallback(char *topic, JSONVar payloadJSON)
     {
         if ((bool)payloadJSON["device_status"])
         {
-            device_info["device_status"] = false;
+            device_info["device_status"] = true;
         }
         else
         {
-            device_info["device_status"] = true;
+            device_info["device_status"] = false;
         }
     }
 }

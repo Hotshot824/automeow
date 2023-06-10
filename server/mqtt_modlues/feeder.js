@@ -25,7 +25,7 @@ class feederClient extends SensorModuleBase {
     }
 
     _handleConnect() {
-        console.log('[Sensor module] Feeder module connection to mqtt server!');
+        console.log('Sensor module | Feeder module connection to mqtt server!');
         this._mqttClient.subscribe('automeow/feeder/info');
         this._mqttClient.subscribe('automeow/feeder/distance');
     }

@@ -1,5 +1,5 @@
 <script>
-import DHT22 from '../../../../api/DHT22'
+import sensor_nodes from '../../../../api/sensor_nodes'
 
 function extract(history) {
     const temperatures = history.map(item => item.temperature);
@@ -19,8 +19,7 @@ export default {
     name: "Content",
     mounted() {
 
-        DHT22.fetchDHTHistoryData()
-            .then(response => response.json())
+        const data = sensor_nodes.fetchHistoryData('ENV-01')
             .then(data => {
                 const { temperatures, humidities, lastupdate } = extract(data.history.reverse());
                 // Set new default font family and font color to mimic Bootstrap's default styling
@@ -131,6 +130,4 @@ export default {
     </div>
 </template>
 
-<style>
-
-</style>
+<style></style>

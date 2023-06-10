@@ -8,7 +8,7 @@ const logger = require('koa-logger')
 
 const index = require('./routes/index')
 const users = require('./routes/users')
-const sensors = require('./routes/sensors')
+const nodes = require('./routes/nodes')
 
 const pool = require('./mysql')
 app.context.db = pool;
@@ -39,7 +39,7 @@ app.use(async (ctx, next) => {
 // routes
 app.use(index.routes(), index.allowedMethods())
 app.use(users.routes(), users.allowedMethods())
-app.use(sensors.routes(), sensors.allowedMethods())
+app.use(nodes.routes(), nodes.allowedMethods())
 
 // error-handling
 app.on('error', (err, ctx) => {

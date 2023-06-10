@@ -3,16 +3,16 @@ USE automeow
 CREATE TABLE device_info
 (
     `uid` INT(6) AUTO_INCREMENT NOT NULL,
-    `devicename` CHAR(20) NOT NULL,
+    `device_name` CHAR(20) NOT NULL,
     PRIMARY KEY(`uid`),
-    UNIQUE (`devicename`)
+    UNIQUE (`device_name`)
 );
 
-CREATE TABLE DHT22_data
+CREATE TABLE environment_data
 (
-    `devicename` CHAR(20) NOT NULL,
+    `device_name` CHAR(20) NOT NULL,
     `humidity` FLOAT(8) NOT NULL,
     `temperature` FLOAT(8) NOT NULL,
     `lastupdate` DATETIME NOT NULL,
-    FOREIGN KEY(`devicename`) REFERENCES device_info(`devicename`)
+    FOREIGN KEY(`device_name`) REFERENCES device_info(`device_name`)
 );
