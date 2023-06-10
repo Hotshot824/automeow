@@ -37,13 +37,13 @@ export default {
                                 label: "Temperatures",
                                 yAxisID: 'temperature',
                                 lineTension: 0.3,
-                                backgroundColor: "rgba(255, 103, 103, 0.3)",
-                                borderColor: "rgba(255, 103, 103, 1)",
+                                backgroundColor: "rgba(129, 199, 212, 0.3)",
+                                borderColor: "rgba(0, 104, 255, 1)",
                                 pointRadius: 5,
-                                pointBackgroundColor: "rgba(255, 153, 153, 1)",
-                                pointBorderColor: "rgba(255, 103, 103, 0.8)",
+                                pointBackgroundColor: "rgba(0, 104, 255, 1)",
+                                pointBorderColor: "rgba(255, 255, 255, 0.8)",
                                 pointHoverRadius: 5,
-                                pointHoverBackgroundColor: "rgba(255, 153, 153, 1)",
+                                pointHoverBackgroundColor: "rgba(153, 204, 255, 1)",
                                 pointHitRadius: 50,
                                 pointBorderWidth: 2,
                                 data: temperatures,
@@ -53,12 +53,12 @@ export default {
                                 yAxisID: 'humidity',
                                 lineTension: 0.3,
                                 backgroundColor: "rgba(0, 0, 0, 0)",
-                                borderColor: "rgba(0, 104, 255, 1)",
+                                borderColor: "rgba(255, 62, 58, 1)",
                                 pointRadius: 5,
-                                pointBackgroundColor: "rgba(0, 104, 255, 1)",
+                                pointBackgroundColor: "rgba(255, 104, 0, 1)",
                                 pointBorderColor: "rgba(255, 255, 255, 0.8)",
                                 pointHoverRadius: 5,
-                                pointHoverBackgroundColor: "rgba(153, 204, 255, 1)",
+                                pointHoverBackgroundColor: "rgba(255, 204, 153, 1)",
                                 pointHitRadius: 50,
                                 pointBorderWidth: 2,
                                 data: humidities,
@@ -122,9 +122,9 @@ export default {
 
 <template>
     <div class="card mb-4">
-        <div class="card-header bg-primary text-white">
+        <div class="card-header bg-light">
             <i class="fas fa-chart-area me-1"></i>
-            Temperature and Humidity History
+            Temperature and Humidity
         </div>
         <div class="card-body"><canvas ref="myAreaChart" width="100%" height="220"></canvas></div>
     </div>

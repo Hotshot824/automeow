@@ -37,7 +37,7 @@ const columns = [
                 </ol>
                 <div class="row">
                     <div class="col-xl-3 col-md-6">
-                        <component :is="components.environment_card" bg="bg-primary" cardtitle="DHT Sensor"/>
+                        <component :is="components.environment_card" bg="bg-light" cardtitle="ENV-01 Sensor Node"/>
                     </div>
                     <div class="col-xl-3 col-md-6">
                         <!-- <component :is="components.feeder_card" bg="bg-success" cardtitle="Feeder"/> -->
