@@ -32,20 +32,18 @@ setInterval(getData, 10000);
 </script>
 
 <template>
-  <template v-if="(typeof device_name !== 'undefined')">
-    <tr>
-      <!-- Name, Data, Position, Online, Last upload -->
-      <td>{{ device_name }}</td>
-      <td>
-        <template v-if="!isNaN(temperature) && !isNaN(humidity)">
-          Temperature: {{ temperature }}, Humidity: {{ humidity }}, Light: {{ light }}
-        </template>
-      </td>
-      <td>{{ device_position }}</td>
-      <td>{{ device_status ? 'Active' : 'Inactive' }}</td>
-      <td>{{ lastupdate }}</td>
-    </tr>
-  </template>
+  <tr>
+    <!-- Name, Data, Position, Online, Last upload -->
+    <td>{{ device_name }}</td>
+    <td>
+      <template v-if="!isNaN(temperature)">
+        Temperature: {{ temperature }}, Humidity: {{ humidity }}, Light: {{ light }}
+      </template>
+    </td>
+    <td>{{ device_position }}</td>
+    <td>{{ device_status ? 'Active' : 'Inactive' }}</td>
+    <td>{{ lastupdate }}</td>
+  </tr>
 </template>
 
 <style></style>

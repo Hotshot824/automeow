@@ -5,17 +5,17 @@ const config = require('../config.json');
 class environmentClient extends SensorModuleBase {
     constructor(name, type, postition, status) {
         super(name, type, postition, status);
-        this._temperature;
-        this._humidity;
-        this._light;
 
         this._host = config.mqtt.host;
         this._port = config.mqtt.port;
-
         this._mqttClient = mqtt.connect(this._host, {
             port: this._port,
             client: 'automeow-backend',
         });
+
+        this._temperature;
+        this._humidity;
+        this._light;
 
         this._average_queue = [];
         // Average unit =  average count * publish interval = total second (360 * 10 = 3600 sec).
@@ -27,41 +27,8 @@ class environmentClient extends SensorModuleBase {
         this._mqttClient.on('message', this._handleMessage.bind(this));
     }
 
-    _averageQueueIsFull() {
-        if (this._average_queue.length == this._average_counter) {
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    _cleanQueue() {
-        // let lastData = this._average_queue[this._average_queue.length - 1]
-        this._average_queue = []
-        // this._average_queue.push(lastData)
-    }
-
-    _averageCauculate() {
-        let length = this._average_queue.length
-        let sum = this._average_queue.reduce((acc, curr) => {
-            let t = curr[0], h = curr[1];
-            // Does not count if sensor is wrong
-            if (t == 0 || t > 40 || h == 0) {
-                length--;
-                return acc;
-            }
-            acc[0] += t;
-            acc[1] += h;
-            return acc
-        }, [0, 0]);
-        return {
-            'temperature': parseFloat((sum[0] / length).toFixed(2)),
-            'humidity': parseFloat((sum[1] / length).toFixed(2))
-        }
-    }
-
     _handleConnect() {
-        console.log('[Sensor module] New environment module ' + this._device_name + ' to mqtt server connected!');
+        console.log('Sensor module | New environment module ' + this._device_name + ' to mqtt server connected!');
         this._mqttClient.subscribe('automeow/info');
     }
 
@@ -107,6 +74,39 @@ class environmentClient extends SensorModuleBase {
             default:
                 console.log('Error!');
                 break;
+        }
+    }
+
+    _averageQueueIsFull() {
+        if (this._average_queue.length == this._average_counter) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    _cleanQueue() {
+        // let lastData = this._average_queue[this._average_queue.length - 1]
+        this._average_queue = []
+        // this._average_queue.push(lastData)
+    }
+
+    _averageCauculate() {
+        let length = this._average_queue.length
+        let sum = this._average_queue.reduce((acc, curr) => {
+            let t = curr[0], h = curr[1];
+            // Does not count if sensor is wrong
+            if (t == 0 || t > 40 || h == 0) {
+                length--;
+                return acc;
+            }
+            acc[0] += t;
+            acc[1] += h;
+            return acc
+        }, [0, 0]);
+        return {
+            'temperature': parseFloat((sum[0] / length).toFixed(2)),
+            'humidity': parseFloat((sum[1] / length).toFixed(2))
         }
     }
 
@@ -167,6 +167,7 @@ class environmentClient extends SensorModuleBase {
                 this._device_status = !this._device_status;
 
                 return {
+                    "device_name": this._device_name,
                     "device_status": this._device_status
                 }
 

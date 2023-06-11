@@ -17,9 +17,12 @@ const store = useStore();
 
 const device_name = computed(() => store.state.feeder.device_name);
 const device_position = computed(() => store.state.feeder.device_position);
+const device_status = computed(() => store.state.feeder.device_status);
+const lastupdate = computed(() => store.state.feeder.lastupdate);
+const init_distance = computed(() => store.state.feeder.init_distance);
 const distance = computed(() => store.state.feeder.distance);
-const online = computed(() => store.state.feeder.online);
-const time = computed(() => store.state.feeder.time);
+const mode = computed(() => store.state.feeder.mode);
+
 
 function getData() {
     store.dispatch('feeder/getData');
@@ -30,18 +33,16 @@ setInterval(getData, 10000);
 </script>
 
 <template>
-    <template v-if="!isNaN(distance)">
-        <tr>
-            <!-- Name, Data, Position, Online, Last upload -->
-            <td>{{ device_name }}</td>
-            <td>
-                Distance: {{ distance }} mm
-            </td>
-            <td>{{ device_position }}</td>
-            <td>{{ online ? 'Active' : 'Inactive' }}</td>
-            <td>{{ time }}</td>
-        </tr>
-    </template>
+    <tr>
+        <!-- Name, Data, Position, Online, Last upload -->
+        <td>{{ device_name }}</td>
+        <td>
+            Distance: {{ distance }}, Mode: {{ mode }}
+        </td>
+        <td>{{ device_position }}</td>
+        <td>{{ device_status ? 'Active' : 'Inactive' }}</td>
+        <td>{{ lastupdate }}</td>
+    </tr>
 </template>
 
 <style></style>

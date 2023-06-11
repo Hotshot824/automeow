@@ -3,13 +3,13 @@ import sensorNodes from '../../api/sensor_nodes'
 // initial state
 // shape: [{ id, quantity }]
 const state = () => ({
-    device_name: NaN,
-    device_position: NaN,
-    device_status: NaN,
-    temperature: NaN,
-    humidity: NaN,
-    light: NaN,
-    lastupdate: NaN,
+    device_name: undefined,
+    device_position: undefined,
+    device_status: undefined,
+    lastupdate: undefined,
+    temperature: undefined,
+    humidity: undefined,
+    light: undefined,
 })
 
 // getters
@@ -20,20 +20,29 @@ const getters = {
 const actions = {
     async getData({ commit }) {
         const response = await sensorNodes.fetchData("ENV-01");
-        commit('updateData', {
-            device_name: response.device_name,
-            device_position: response.device_position,
-            device_status: response.device_status,
-            lastupdate: response.lastupdate,
-            temperature: response.data.temperature,
-            humidity: response.data.humidity,
-            light: response.data.light,
-        });
+        console.log(response);
+        if (Object.keys(response.data).length > 0) {
+            commit('updateData', {
+                device_name: response.device_name,
+                device_position: response.device_position,
+                device_status: response.device_status,
+                lastupdate: response.lastupdate,
+                temperature: response.data.temperature,
+                humidity: response.data.humidity,
+                light: response.data.light,
+            });
+        } else {
+            commit('updateStatus', {
+                device_name: response.device_name,
+                device_status: response.device_status,
+            });
+        }
     },
     async toggle({ commit }) {
-        const data = await sensorNodes.fetchControl("ENV-01", "toggle");
+        const response = await sensorNodes.fetchControl("ENV-01", "toggle");
         commit('updateStatus', {
-            device_status: data.device_status
+            device_name: response.device_name,
+            device_status: response.device_status,
         });
     }
 }
@@ -41,6 +50,7 @@ const actions = {
 // mutations
 const mutations = {
     updateData(state, payload) {
+        console.log(payload);
         state.device_name = payload.device_name;
         state.device_position = payload.device_position;
         state.device_status = payload.device_status;
@@ -52,6 +62,7 @@ const mutations = {
         }
     },
     updateStatus(state, payload) {
+        state.device_name = payload.device_name,
         state.device_status = payload.device_status;
     },
 }

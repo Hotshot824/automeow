@@ -3,45 +3,42 @@ const mqtt = require('mqtt');
 const config = require('../config.json');
 
 class feederClient extends SensorModuleBase {
-    constructor() {
-        super();
+    constructor(name, type, postition, status) {
+        super(name, type, postition, status);
+
         this._host = config.mqtt.host;
         this._port = config.mqtt.port;
-
-        this._mqtt_opt = {
+        this._mqttClient = mqtt.connect(this._host, {
             port: this._port,
             client: 'automeow-server-Feeder',
-        };
+        });
 
-        this._mqttClient = mqtt.connect(this._host, this._mqtt_opt);
-        this._distance
-        this._online;
-        this._time;
+        this._init_distance;
+        this._distance;
+        this._mode;
 
         this._mqttClient.on('connect', this._handleConnect.bind(this));
         this._mqttClient.on('message', this._handleMessage.bind(this));
-
-        this._startCheckDevice();
     }
 
     _handleConnect() {
-        console.log('Sensor module | Feeder module connection to mqtt server!');
-        this._mqttClient.subscribe('automeow/feeder/info');
-        this._mqttClient.subscribe('automeow/feeder/distance');
+        console.log('Sensor module | New feeder module ' + this._device_name + ' to mqtt server connected!');
+        this._mqttClient.subscribe('automeow/info');
     }
 
     _handleMessage(topic, msg) {
         switch (topic) {
-            case 'automeow/feeder/info':
-                const [online, device_name, device_position] = msg.toString().split(',');
-                this._device_name = device_name;
-                this._device_postition = device_position;
-                this._online = online;
-                this._time = this._updateCurrentTime();
-                this._registerDevice(this._device_name);
-                break;
-            case 'automeow/feeder/distance':
-                this._distance = msg.toString();
+            case 'automeow/info':
+                let info = JSON.parse(msg.toString());
+                if (info.device_name == this._device_name && Object.keys(info.data).length > 0) {
+
+                    // Storage this time subscribe data.
+                    this._device_status = info.device_status;
+                    this._mode = info.data.mode;
+                    this._init_distance = info.data.init_distance;
+                    this._distance = info.data.distance;
+                    this._lastupdate_time = this._updateCurrentTime();
+                }
                 break;
             default:
                 console.log('Error!');
@@ -49,42 +46,67 @@ class feederClient extends SensorModuleBase {
         }
     }
 
-    // Check if the device is online every 30 seconds
-    _startCheckDevice() {
-        setInterval(() => {
-            let currentTime = this._updateCurrentTime();
-            let timeDiffInSeconds = Math.abs(new Date(currentTime) - new Date(this._time)) / 1000;
-            if (timeDiffInSeconds >= 30) {
-                this._online = 'OFF';
-            }
-        }, 30000);
-    }
-
     GetData() {
         return {
+            "device_type": this._device_type,
             "device_name": this._device_name,
             "device_position": this._device_postition,
-            "distance": this._distance,
-            "online": this._online,
-            "time": this._time,
+            "device_status": this._device_status,
+            "lastupdate": this._lastupdate_time,
+            "data": {
+                "mode": this._mode,
+                "init_distance": this._init_distance,
+                "distance": this._distance,
+            }
         }
     }
 
-    Toggle() {
-        if (this._online == 'ON') {
-            this._mqttClient.publish('automeow/feeder/control', "0");
-            this._online = 'OFF';
-        } else {
-            this._mqttClient.publish('automeow/feeder/control', "1");
-            this._online = 'ON';
+    async GetHistoryData() {
+        return {
+            "history": NaN
         }
-        return this._online
     }
 
-    ToFeed() {
-        this._mqttClient.publish('automeow/feeder/control', "2");
-    }
+    Control(control_type) {
+        let pub;
+        switch (control_type) {
+            case "toggle":
+                // Here to flip status
+                this._device_status = !this._device_status;
+                pub = JSON.stringify({
+                    "device_name": this._device_name,
+                    "device_status": this._device_status,
+                    "feeder_status": false,
+                    "device_mode": (this._mode == "manual") ? true : false,
+                })
 
+                this._mqttClient.publish('automeow/control', pub);
+
+                return {
+                    "device_status": this._device_status
+                }
+
+            case "feeder":
+                // Here to flip status
+                pub = JSON.stringify({
+                    "device_name": this._device_name,
+                    "device_status": this._device_status,
+                    "feeder_status": true,
+                    "device_mode": (this._mode == "manual") ? true : false,
+                })
+
+                this._mqttClient.publish('automeow/control', pub);
+
+                return {
+                    "device_name": this._device_name,
+                    "device_status": this._device_status,
+                    "control_result": "Success to feeder",
+                }
+
+            default:
+                break;
+        }
+    }
 }
 
 module.exports = feederClient;

@@ -44,7 +44,7 @@ window.addEventListener('DOMContentLoaded', event => {
                 </tfoot>
                 <tbody>
                     <component :is="components.environment_data" />
-                    <!-- <component :is="components.feeder_data"/> -->
+                    <component :is="components.feeder_data"/>
                 </tbody>
             </table>
         </div>

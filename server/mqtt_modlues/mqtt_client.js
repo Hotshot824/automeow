@@ -18,6 +18,7 @@ class SensorModuleBase {
         this._modules = {};
         this._module_type = {
             "ENV": environmentClient,
+            "feeder": feederClient,
             // "fountain": feederClient
         };
 
@@ -28,13 +29,12 @@ class SensorModuleBase {
     _handleConnect() {
         console.log('Sensor module | Client module to mqtt server connected!');
         this._mqttClient.subscribe('automeow/info');
-        this._mqttClient.subscribe('automeow/control');
     }
 
     _handleMessage(topic, msg) {
         switch (topic) {
             case 'automeow/info':
-                let info = JSON.parse(msg.toString())
+                let info = JSON.parse(msg.toString());
                 if (!(info.device_name in this._modules)) {
                     // create a new nodes in modules list.
                     if (!(info.device_type in this._module_type)) { break; }

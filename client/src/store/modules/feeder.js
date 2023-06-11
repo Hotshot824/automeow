@@ -1,13 +1,15 @@
-import feeder from '../../api/feeder'
+import sensorNodes from '../../api/sensor_nodes'
 
 // initial state
 // shape: [{ id, quantity }]
 const state = () => ({
-    device_name: null,
-    device_position: null,
-    distance: null,
-    online: null,
-    time: null,
+    device_name: undefined,
+    device_position: undefined,
+    device_status: undefined,
+    lastupdate: undefined,
+    mode: undefined,
+    init_distance: undefined,
+    distance: undefined,
 })
 
 // getters
@@ -17,25 +19,24 @@ const getters = {
 // actions
 const actions = {
     async getData({ commit }) {
-        const data = await feeder.fetchData();
-        // console.log(data);
-        commit('updateData', {
-            device_name: data.device_name,
-            device_position: data.device_position,
-            distance: data.distance,
-            time: data.time,
-            online: data.online
-        });
+        const response = await sensorNodes.fetchData("feeder-01");
+        if (Object.keys(response).length > 4) {
+            commit('updateData', {
+                device_name: response.device_name,
+                device_position: response.device_position,
+                device_status: response.device_status,
+                lastupdate: response.lastupdate,
+                mode: response.data.mode,
+                init_distance: response.data.init_distance,
+                distance: response.data.distance,
+            });
+        }
     },
     async toggle({ commit }) {
-        const data = await feeder.fetchToggle();
-        // console.log(data);
-        commit('updateOnline', {
-            online: data.online
+        const data = await sensorNodes.fetchControl("feeder-01", "toggle");
+        commit('updateStatus', {
+            device_status: data.device_status
         });
-    },
-    async toFeed({ commit }) {
-        const data = await feeder.fetchToFeed();
     }
 }
 
@@ -44,12 +45,16 @@ const mutations = {
     updateData(state, payload) {
         state.device_name = payload.device_name;
         state.device_position = payload.device_position;
-        state.distance = payload.distance,
-        state.time = payload.time;
-        state.online = payload.online;
+        state.device_status = payload.device_status;
+        state.lastupdate = payload.lastupdate;
+        if (!isNaN(payload.distance)) {
+            state.mode = payload.mode;
+            state.init_distance = payload.init_distance;
+            state.distance = payload.distance;
+        }
     },
-    updateOnline(state, payload) {
-        state.online = payload.online;
+    updateStatus(state, payload) {
+        state.device_status = payload.device_status;
     },
 }
 
