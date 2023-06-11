@@ -7,7 +7,7 @@ class SensorModuleBase {
         this._device_postition = postition;
         this._device_type = type;
         this._device_status = status;
-        this._lastupdate_time;
+        this._lastupdate_time = this._updateCurrentTime();
 
         this._host = config.mqtt.host;
         this._port = config.mqtt.port;

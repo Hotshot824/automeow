@@ -87,7 +87,7 @@ void loop()
 
     String jsonString = JSON.stringify(device_info);
     const char *jsonCharArray = jsonString.c_str();
-    client.publish(TOPIC_INFO, jsonCharArray, strlen(jsonCharArray));
+    client.publish(TOPIC_INFO, jsonCharArray, false);
     Serial.print("Publish to ");
     Serial.println(TOPIC_INFO);
 

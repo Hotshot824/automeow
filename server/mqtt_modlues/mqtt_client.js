@@ -39,7 +39,7 @@ class SensorModuleBase {
                     // create a new nodes in modules list.
                     if (!(info.device_type in this._module_type)) { break; }
                     const new_node = new this._module_type[info.device_type](
-                        info.device_name, info.device_type, info.device_position, info.device_status
+                        info.device_name, info.device_type, info.device_position, info.device_status, info.data
                     );
                     this._modules[info.device_name] = new_node;
                 }

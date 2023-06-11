@@ -10,10 +10,6 @@ router.get('/', async (ctx, next) => {
     const data = mqttClient.GetModuleData(name);
     if (data) {
         ctx.body = data;
-    } else {
-        ctx.body = {
-            Error: "No Data"
-        };
     }
 })
 
@@ -28,10 +24,6 @@ router.get('/history', async (ctx, next) => {
     const data = await mqttClient.GetModuleHistoryData(name);
     if (data) {
         ctx.body = data
-    } else {
-        ctx.body = {
-            Error: "No Data"
-        };
     }
 })
 
@@ -41,10 +33,6 @@ router.get('/contorl', async (ctx, next) => {
     const data = mqttClient.ControlModule(name, type);
     if (data) {
         ctx.body = data;
-    } else {
-        ctx.body = {
-            Error: "No Data"
-        };
     }
 })
 

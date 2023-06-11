@@ -3,7 +3,7 @@ const mqtt = require('mqtt');
 const config = require('../config.json');
 
 class environmentClient extends SensorModuleBase {
-    constructor(name, type, postition, status) {
+    constructor(name, type, postition, status, data) {
         super(name, type, postition, status);
 
         this._host = config.mqtt.host;
@@ -13,9 +13,9 @@ class environmentClient extends SensorModuleBase {
             client: 'automeow-backend',
         });
 
-        this._temperature;
-        this._humidity;
-        this._light;
+        this._temperature = parseFloat(data.temperature.toFixed(2));
+        this._humidity = parseFloat(data.humidity.toFixed(2));
+        this._light = parseFloat(data.light.toFixed(2));
 
         this._average_queue = [];
         // Average unit =  average count * publish interval = total second (360 * 10 = 3600 sec).
@@ -36,10 +36,14 @@ class environmentClient extends SensorModuleBase {
         switch (topic) {
             case 'automeow/info':
                 let info = JSON.parse(msg.toString())
-                if (info.device_name == this._device_name && Object.keys(info.data).length > 0) {
+                if (info.device_name == this._device_name && info.data != undefined) {
 
                     // Storage this time subscribe data.
                     this._device_status = info.device_status;
+                    if (this._device_status == false) {
+                        break;
+                    }
+
                     this._temperature = parseFloat(info.data.temperature.toFixed(2));
                     this._humidity = parseFloat(info.data.humidity.toFixed(2));
                     this._light = parseFloat(info.data.light.toFixed(2));
@@ -160,9 +164,9 @@ class environmentClient extends SensorModuleBase {
                 })
 
                 if (this._device_status) {
-                    this._mqttClient.publish('automeow/control', pub);
+                    this._mqttClient.publish('automeow/control', pub, { retain: false });
                 } else {
-                    this._mqttClient.publish('automeow/control', pub);
+                    this._mqttClient.publish('automeow/control', pub, { retain: false });
                 }
                 this._device_status = !this._device_status;
 

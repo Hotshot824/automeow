@@ -6,6 +6,7 @@ async function fetchData(device_name) {
         return data;
     } catch (error) {
         console.log(error);
+        return { device_status: false };
     }
 }
 
@@ -17,6 +18,7 @@ async function fetchHistoryData(device_name) {
         return data;
     } catch (error) {
         console.log(error);
+        return { device_status: false };
     }
 }
 
@@ -28,6 +30,7 @@ async function fetchControl(device_name, control_type) {
         return data;
     } catch (error) {
         console.log(error);
+        return { device_status: false };
     }
 }
 

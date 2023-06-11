@@ -22,6 +22,7 @@ window.addEventListener('DOMContentLoaded', event => {
         new simpleDatatables.DataTable(datatablesSimple);
     }
 });
+
 </script>
 
 <template>
@@ -43,7 +44,7 @@ window.addEventListener('DOMContentLoaded', event => {
                     </tr>
                 </tfoot>
                 <tbody>
-                    <component :is="components.environment_data" />
+                    <component :is="components.environment_data"/>
                     <component :is="components.feeder_data"/>
                 </tbody>
             </table>

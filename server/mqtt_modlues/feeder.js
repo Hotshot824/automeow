@@ -3,7 +3,7 @@ const mqtt = require('mqtt');
 const config = require('../config.json');
 
 class feederClient extends SensorModuleBase {
-    constructor(name, type, postition, status) {
+    constructor(name, type, postition, status, data) {
         super(name, type, postition, status);
 
         this._host = config.mqtt.host;
@@ -13,9 +13,9 @@ class feederClient extends SensorModuleBase {
             client: 'automeow-server-Feeder',
         });
 
-        this._init_distance;
-        this._distance;
-        this._mode;
+        this._init_distance = data.init_distance;
+        this._distance = data.distance;
+        this._mode = data.mode;
 
         this._mqttClient.on('connect', this._handleConnect.bind(this));
         this._mqttClient.on('message', this._handleMessage.bind(this));
@@ -30,10 +30,14 @@ class feederClient extends SensorModuleBase {
         switch (topic) {
             case 'automeow/info':
                 let info = JSON.parse(msg.toString());
-                if (info.device_name == this._device_name && Object.keys(info.data).length > 0) {
+                if (info.device_name == this._device_name && info.data != undefined) {
 
                     // Storage this time subscribe data.
                     this._device_status = info.device_status;
+                    if (this._device_status == false) {
+                        break;
+                    }
+
                     this._mode = info.data.mode;
                     this._init_distance = info.data.init_distance;
                     this._distance = info.data.distance;

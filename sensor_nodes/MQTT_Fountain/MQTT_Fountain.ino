@@ -54,7 +54,7 @@ void loop()
   {
     String jsonString = JSON.stringify(device_info);
     const char *jsonCharArray = jsonString.c_str();
-    client.publish(TOPIC_INFO, jsonCharArray, strlen(jsonCharArray));
+    client.publish(TOPIC_INFO, jsonCharArray, false);
     Serial.print("Device Mode: ");
     Serial.println(device_info["data"]["mode"]);
     // update last time value
@@ -94,12 +94,8 @@ void loop()
 void topicSubPub()
 {
   // Once connected, publish an announcement...
-  String jsonString = JSON.stringify(device_info);
-  const char *jsonCharArray = jsonString.c_str();
-  client.publish(TOPIC_INFO, jsonCharArray, strlen(jsonCharArray));
   // ... and resubscribe
   client.subscribe(TOPIC_CONTROL);
-  // ... and resubscribe
 }
 
 void handleCallback(char *topic, JSONVar payloadJSON)

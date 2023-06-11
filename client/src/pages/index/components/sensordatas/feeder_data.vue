@@ -33,16 +33,18 @@ setInterval(getData, 10000);
 </script>
 
 <template>
-    <tr>
-        <!-- Name, Data, Position, Online, Last upload -->
-        <td>{{ device_name }}</td>
-        <td>
-            Distance: {{ distance }}, Mode: {{ mode }}
-        </td>
-        <td>{{ device_position }}</td>
-        <td>{{ device_status ? 'Active' : 'Inactive' }}</td>
-        <td>{{ lastupdate }}</td>
-    </tr>
+    <template v-if="device_status">
+        <tr>
+            <!-- Name, Data, Position, Online, Last upload -->
+            <td>{{ device_name }}</td>
+            <td>
+                Init Distance: {{ init_distance }}, Distance: {{ distance }}, Mode: {{ mode }}
+            </td>
+            <td>{{ device_position }}</td>
+            <td>{{ device_status ? 'Active' : 'Inactive' }}</td>
+            <td>{{ lastupdate }}</td>
+        </tr>
+    </template>
 </template>
 
 <style></style>
