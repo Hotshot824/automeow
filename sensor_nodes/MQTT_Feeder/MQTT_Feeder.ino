@@ -1,6 +1,5 @@
-<<<<<<< HEAD:sensor_modules/MQTT_Feeder/MQTT_Feeder.ino
-#include <LWiFi.h>
-#include <PubSubClient.h>
+#include "base.h"
+#include "config.h"
 #include <Servo.h>
 #include <Wire.h>
 #include "vl53l0x.h"
@@ -8,524 +7,166 @@
 Servo myservo; // create servo object to control a servo
 // twelve servo objects can be created on most boards
 #define SERVO_PIN 10
-
+#define BUTTON_PIN 6
 int pos = 0; // variable to store the servo position
 
-// WiFi AP ssid / password here
-char ssid[] = "SSID";    //  your network SSID (name)
-char pass[] = "PASSWORD"; // your network password (use for WPA, or use as key for WEP)
-
-// MQTT Broker info
-// IPAddress server(192, 168, 1, 182);
-char server[] = "MQTT SERVER";
-int port = 1883;
-
-// MQTT Client info
-// Client ID.
-// Note that a broker allows an individual client to create only on session.
-// If a session is created by another client with same cliend ID, the former one will be disconnected.
-// Thus, each sensor node's client must be different from each other.
-#define DEVICE_NAME "Feeder-bedroom"
-#define DEVICE_POSITION "bedroom"
-char client_id[] = DEVICE_NAME;
-
-// MQTT topics
-#define TOPIC_INFO "automeow/feeder/info"
-#define TOPIC_DISTANCE "automeow/feeder/distance"
-#define TOPIC_CONTROL "automeow/feeder/control"
-
-void buildInfo(char *info, char *status)
-{
-    strcpy(info, status);
-    strcat(info, ",");
-    strcat(info, DEVICE_NAME);
-    strcat(info, ",");
-    strcat(info, DEVICE_POSITION);
-    strcat(info, ",");
-}
-
-// Clients for MQTT
-WiFiClient wifiClient;
-PubSubClient client(wifiClient);
+// Set auto feeder diff, unit is mm.
+#define AUTO_FEEDER_DIFF 15
 
 // Timer info
-#define DEVICE_Publish_interval 10000
+#define PUB_INTERVAL 10000
 unsigned long temp_last_time;
+unsigned long current_time;
 
-// LED Control info
-#define LED_PIN LED_BUILTIN
-typedef enum
+// Device init info and status
+JSONVar device_info;
+void initInfo()
 {
-    DEVICE_OFF = 0,
-    DEVICE_ON,
-} Control_Status;
-Control_Status device_status = DEVICE_ON;
-
-typedef enum
-{
-    FEEDER_OFF = 0,
-    FEEDER_ON,
-} Feeder_Status;
-Feeder_Status to_feed = FEEDER_OFF;
-
-void led_on()
-{
-    digitalWrite(LED_PIN, HIGH);
-}
-
-void led_off()
-{
-    digitalWrite(LED_PIN, LOW);
-}
-
-void callback(char *topic, byte *payload, unsigned int length)
-{
-    // Output incoming message to serial terminal
-    Serial.print("Message arrived [");
-    Serial.print(topic);
-    Serial.print("] ");
-    for (int i = 0; i < length; i++)
-    {
-        Serial.print((char)payload[i]);
-    }
-    Serial.println();
-
-    // If LED Control command is incoming, change LED status
-    if (!strcmp(topic, TOPIC_CONTROL))
-    {
-        switch (payload[0])
-        {
-        case '0':
-            device_status = DEVICE_OFF;
-            break;
-        case '1':
-            device_status = DEVICE_ON;
-            break;
-        case '2':
-            to_feed = FEEDER_ON;
-            break;
-        default:
-        {
-        }
-        }
-    }
-}
-
-void reconnect()
-{
-    // Loop until we're reconnected
-    while (!client.connected())
-    {
-        Serial.print("Attempting MQTT connection...");
-        // Attempt to connect
-        if (client.connect(client_id))
-        {
-            Serial.println("connected");
-            // Once connected, publish an announcement...
-            char info[50];
-            buildInfo(info, "ON");
-            client.publish(TOPIC_INFO, info);
-            // ... and resubscribe
-            client.subscribe(TOPIC_CONTROL);
-            // ... and resubscribe
-        }
-        else
-        {
-            Serial.print("failed, rc=");
-            Serial.print(client.state());
-            Serial.println(" try again in 5 seconds");
-            // Wait 5 seconds before retrying
-            delay(5000);
-        }
-    }
+  // Init a JSON Object
+  device_info["device_type"] = DEVICE_TYPE;
+  device_info["device_name"] = DEVICE_NAME;
+  device_info["device_position"] = DEVICE_POSITION;
+  device_info["device_status"] = true;
+  device_info["feeder_status"] = false;
+  device_info["data"]["mode"] = "manual";
 }
 
 void setup()
 {
-    Wire.begin(); 
-    // setup Serial output at 9600
-    Serial.begin(9600);
+  // join i2c bus (address optional for master)
+  Wire.begin();
 
-    // initialization servo
-    initServo();
+  initInfo();
+  setupBase();
 
-    // Set MQTT broker
-    client.setServer(server, port);
-    client.setCallback(callback);
+  initServo();
+  attachInterrupt(BUTTON_PIN, pin_change, RISING);
 
-    // setup Wifi connection
-    while (WL_CONNECTED != WiFi.status())
-    {
-        Serial.print("WiFi.begin(");
-        Serial.print(ssid);
-        Serial.print(",");
-        Serial.print(pass);
-        Serial.println(")...");
-        WiFi.begin(ssid, pass);
-    }
-    Serial.println("WiFi connected !!");
-    printWifiStatus();
+  device_info["data"]["init_distance"] = read_dist();
+  Serial.print("the init distance is ");
+  Serial.println(device_info["data"]["init_distance"]);
 
-    temp_last_time = millis();
+  temp_last_time = millis();
 }
 
 void loop()
 {
-    unsigned long current_time;
+  // Check MQTT broker connection status
+  // If it is disconnected, reconnect to the broker
+  if (!client.connected())
+  {
+    reconnect();
+  }
 
-    if (!client.connected())
+  // Get info publish them ...
+  current_time = millis();
+  if (PUB_INTERVAL < (current_time - temp_last_time))
+  {
+    if (device_info["device_status"])
     {
-        reconnect();
+      int distance = read_dist();
+      device_info["data"]["distance"] = distance;
+      Serial.print("the sensor distance is ");
+      Serial.println(distance);
+    }
+    else
+    {
+      device_info["data"]["distance"] = undefined;
     }
 
-    // Get temperature & humidity and publish them
-    current_time = millis();
-    if (DEVICE_Publish_interval < (current_time - temp_last_time))
+    if (device_info["device_status"] && !strcmp(device_info["data"]["mode"], "auto"))
     {
-        if (device_status == DEVICE_OFF)
-        {
-            char info[50];
-            buildInfo(info, "OFF");
-            client.publish(TOPIC_INFO, info);
-        }
-        else
-        {
-            char dist[10];
-            sprintf(dist, "%d", read_dist());
-            Serial.println(dist);
-            client.publish(TOPIC_DISTANCE, dist);
-            char info[50];
-            buildInfo(info, "ON");
-            client.publish(TOPIC_INFO, info);
-        }
-        // update last time value
-        temp_last_time = current_time;
+      int init_dist = device_info["data"]["init_distance"];
+      int current_dist = device_info["data"]["distance"];
+      int diff = init_dist - current_dist;
+      if (diff <= AUTO_FEEDER_DIFF)
+      {
+        device_info["feeder_status"] = true;
+      }
     }
 
-    if (to_feed == FEEDER_ON && device_status == DEVICE_ON)
+    String jsonString = JSON.stringify(device_info);
+    const char *jsonCharArray = jsonString.c_str();
+    client.publish(TOPIC_INFO, jsonCharArray, strlen(jsonCharArray));
+    Serial.print("Publish to ");
+    Serial.println(TOPIC_INFO);
+
+    // update last time value
+    temp_last_time = current_time;
+  }
+
+  if (device_info["device_status"] && device_info["feeder_status"])
+  {
+    myservo.attach(SERVO_PIN);
+    for (pos = 0; pos <= 90; pos += 1)
     {
-        myservo.attach(SERVO_PIN);
-        for (pos = 0; pos <= 90; pos += 1)
-        { // goes from 0 degrees to 180 degrees
-            // in steps of 1 degree
-            myservo.write(pos); // tell servo to go to position in variable 'pos'
-            delay(15); // waits 15ms for the servo to reach the position
-        }
-        for (pos = 90; pos >= 0; pos -= 1)
-        {                       // goes from 180 degrees to 0 degrees
-            myservo.write(pos); // tell servo to go to position in variable 'pos'
-            delay(15); // waits 15ms for the servo to reach the position
-        }
-        to_feed = FEEDER_OFF;
-        delay(1000);
-        myservo.detach();
+      // goes from 0 degrees to 90 degrees
+      myservo.write(pos); // tell servo to go to position in variable 'pos'
+      delay(5);           // waits for the servo to reach the position
+    }
+    for (pos = 90; pos >= 0; pos -= 1)
+    {                     // goes from 90 degrees to 0 degrees
+      myservo.write(pos); // tell servo to go to position in variable 'pos'
+      delay(5);           // waits for the servo to reach the position
+    }
+    delay(100);
+    device_info["feeder_status"] = !device_info["feeder_status"];
+    myservo.detach();
+  }
+
+  client.loop();
+  deviceStatus();
+}
+
+void topicSubPub()
+{
+  // Once connected, publish an announcement resubscribe
+  client.subscribe(TOPIC_CONTROL);
+}
+
+void handleCallback(char *topic, JSONVar payloadJSON)
+{
+  // If LED Control command is incoming, change LED status
+  if (!strcmp(topic, TOPIC_CONTROL) && !strcmp(payloadJSON["device_name"], DEVICE_NAME))
+  {
+    if ((bool)payloadJSON["device_status"])
+    {
+      device_info["device_status"] = true;
+    }
+    else
+    {
+      device_info["device_status"] = false;
     }
 
-    // Control LED according to dht_status
-    switch (device_status)
+    if ((bool)payloadJSON["device_mode"])
     {
-    case DEVICE_OFF:
-        led_off();
-        break;
-    case DEVICE_ON:
-        led_on();
-        break;
-    default:
-    {
+      device_info["data"]["mode"] = "manual";
     }
+    else
+    {
+      device_info["data"]["mode"] = "auto";
     }
 
-    client.loop();
+    if ((bool)payloadJSON["feeder_status"])
+    {
+      device_info["feeder_status"] = true;
+    }
+    else
+    {
+      device_info["feeder_status"] = false;
+    }
+  }
 }
 
 void initServo()
 {
-    myservo.attach(SERVO_PIN); // attaches the servo on pin 10 to the servo object
-    myservo.write(pos); // tell servo to go to position in variable 'pos'
-    delay(1000);
-    myservo.detach();
+  myservo.attach(SERVO_PIN); // attaches the servo on pin 10 to the servo object
+  myservo.write(pos);        // tell servo to go to position in variable 'pos'
+  delay(1000);
+  myservo.detach();
 }
 
-void printWifiStatus()
+void pin_change(void)
 {
-    // print the SSID of the network you're attached to:
-    Serial.print("SSID: ");
-    Serial.println(WiFi.SSID());
-
-    // print your WiFi shield's IP address:
-    IPAddress ip = WiFi.localIP();
-    Serial.print("IP Address: ");
-    Serial.println(ip);
-
-    // print the received signal strength:
-    long rssi = WiFi.RSSI();
-    Serial.print("signal strength (RSSI):");
-    Serial.print(rssi);
-    Serial.println(" dBm");
+  device_info["feeder_status"] = !device_info["feeder_status"];
 }
-=======
-#include <LWiFi.h>
-#include <PubSubClient.h>
-#include <Servo.h>
-#include <Wire.h>
-#include "vl53l0x.h"
-
-Servo myservo; // create servo object to control a servo
-// twelve servo objects can be created on most boards
-#define SERVO_PIN 10
-
-int pos = 0; // variable to store the servo position
-
-// WiFi AP ssid / password here
-char ssid[] = "SSID";    //  your network SSID (name)
-char pass[] = "PASSWORD"; // your network password (use for WPA, or use as key for WEP)
-
-// MQTT Broker info
-// IPAddress server(192, 168, 1, 182);
-char server[] = "MQTT SERVER";
-int port = 1883;
-
-// MQTT Client info
-// Client ID.
-// Note that a broker allows an individual client to create only on session.
-// If a session is created by another client with same cliend ID, the former one will be disconnected.
-// Thus, each sensor node's client must be different from each other.
-#define DEVICE_NAME "Feeder-bedroom"
-#define DEVICE_POSITION "bedroom"
-char client_id[] = DEVICE_NAME;
-
-// MQTT topics
-#define TOPIC_INFO "automeow/feeder/info"
-#define TOPIC_DISTANCE "automeow/feeder/distance"
-#define TOPIC_CONTROL "automeow/feeder/control"
-
-void buildInfo(char *info, char *status)
-{
-    strcpy(info, status);
-    strcat(info, ",");
-    strcat(info, DEVICE_NAME);
-    strcat(info, ",");
-    strcat(info, DEVICE_POSITION);
-    strcat(info, ",");
-}
-
-// Clients for MQTT
-WiFiClient wifiClient;
-PubSubClient client(wifiClient);
-
-// Timer info
-#define DEVICE_Publish_interval 10000
-unsigned long temp_last_time;
-
-// LED Control info
-#define LED_PIN LED_BUILTIN
-typedef enum
-{
-    DEVICE_OFF = 0,
-    DEVICE_ON,
-} Control_Status;
-Control_Status device_status = DEVICE_ON;
-
-typedef enum
-{
-    FEEDER_OFF = 0,
-    FEEDER_ON,
-} Feeder_Status;
-Feeder_Status to_feed = FEEDER_OFF;
-
-void led_on()
-{
-    digitalWrite(LED_PIN, HIGH);
-}
-
-void led_off()
-{
-    digitalWrite(LED_PIN, LOW);
-}
-
-void callback(char *topic, byte *payload, unsigned int length)
-{
-    // Output incoming message to serial terminal
-    Serial.print("Message arrived [");
-    Serial.print(topic);
-    Serial.print("] ");
-    for (int i = 0; i < length; i++)
-    {
-        Serial.print((char)payload[i]);
-    }
-    Serial.println();
-
-    // If LED Control command is incoming, change LED status
-    if (!strcmp(topic, TOPIC_CONTROL))
-    {
-        switch (payload[0])
-        {
-        case '0':
-            device_status = DEVICE_OFF;
-            break;
-        case '1':
-            device_status = DEVICE_ON;
-            break;
-        case '2':
-            to_feed = FEEDER_ON;
-            break;
-        default:
-        {
-        }
-        }
-    }
-}
-
-void reconnect()
-{
-    // Loop until we're reconnected
-    while (!client.connected())
-    {
-        Serial.print("Attempting MQTT connection...");
-        // Attempt to connect
-        if (client.connect(client_id))
-        {
-            Serial.println("connected");
-            // Once connected, publish an announcement...
-            char info[50];
-            buildInfo(info, "ON");
-            client.publish(TOPIC_INFO, info);
-            // ... and resubscribe
-            client.subscribe(TOPIC_CONTROL);
-            // ... and resubscribe
-        }
-        else
-        {
-            Serial.print("failed, rc=");
-            Serial.print(client.state());
-            Serial.println(" try again in 5 seconds");
-            // Wait 5 seconds before retrying
-            delay(5000);
-        }
-    }
-}
-
-void setup()
-{
-    Wire.begin(); 
-    // setup Serial output at 9600
-    Serial.begin(9600);
-
-    // initialization servo
-    initServo();
-
-    // Set MQTT broker
-    client.setServer(server, port);
-    client.setCallback(callback);
-
-    // setup Wifi connection
-    while (WL_CONNECTED != WiFi.status())
-    {
-        Serial.print("WiFi.begin(");
-        Serial.print(ssid);
-        Serial.print(",");
-        Serial.print(pass);
-        Serial.println(")...");
-        WiFi.begin(ssid, pass);
-    }
-    Serial.println("WiFi connected !!");
-    printWifiStatus();
-
-    temp_last_time = millis();
-}
-
-void loop()
-{
-    unsigned long current_time;
-
-    if (!client.connected())
-    {
-        reconnect();
-    }
-
-    // Get temperature & humidity and publish them
-    current_time = millis();
-    if (DEVICE_Publish_interval < (current_time - temp_last_time))
-    {
-        if (device_status == DEVICE_OFF)
-        {
-            char info[50];
-            buildInfo(info, "OFF");
-            client.publish(TOPIC_INFO, info);
-        }
-        else
-        {
-            char dist[10];
-            sprintf(dist, "%d", read_dist());
-            Serial.println(dist);
-            client.publish(TOPIC_DISTANCE, dist);
-            char info[50];
-            buildInfo(info, "ON");
-            client.publish(TOPIC_INFO, info);
-        }
-        // update last time value
-        temp_last_time = current_time;
-    }
-
-    if (to_feed == FEEDER_ON && device_status == DEVICE_ON)
-    {
-        myservo.attach(SERVO_PIN);
-        for (pos = 0; pos <= 90; pos += 1)
-        { // goes from 0 degrees to 180 degrees
-            // in steps of 1 degree
-            myservo.write(pos); // tell servo to go to position in variable 'pos'
-            delay(15); // waits 15ms for the servo to reach the position
-        }
-        for (pos = 90; pos >= 0; pos -= 1)
-        {                       // goes from 180 degrees to 0 degrees
-            myservo.write(pos); // tell servo to go to position in variable 'pos'
-            delay(15); // waits 15ms for the servo to reach the position
-        }
-        to_feed = FEEDER_OFF;
-        delay(1000);
-        myservo.detach();
-    }
-
-    // Control LED according to dht_status
-    switch (device_status)
-    {
-    case DEVICE_OFF:
-        led_off();
-        break;
-    case DEVICE_ON:
-        led_on();
-        break;
-    default:
-    {
-    }
-    }
-
-    client.loop();
-}
-
-void initServo()
-{
-    myservo.attach(SERVO_PIN); // attaches the servo on pin 10 to the servo object
-    myservo.write(pos); // tell servo to go to position in variable 'pos'
-    delay(1000);
-    myservo.detach();
-}
-
-void printWifiStatus()
-{
-    // print the SSID of the network you're attached to:
-    Serial.print("SSID: ");
-    Serial.println(WiFi.SSID());
-
-    // print your WiFi shield's IP address:
-    IPAddress ip = WiFi.localIP();
-    Serial.print("IP Address: ");
-    Serial.println(ip);
-
-    // print the received signal strength:
-    long rssi = WiFi.RSSI();
-    Serial.print("signal strength (RSSI):");
-    Serial.print(rssi);
-    Serial.println(" dBm");
-}
->>>>>>> benson:sensor_nodes/MQTT_Feeder/MQTT_Feeder.ino

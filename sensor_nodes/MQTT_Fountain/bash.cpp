@@ -5,6 +5,8 @@
 WiFiClient wifiClient;
 PubSubClient client(wifiClient);
 
+char client_id[] = DEVICE_NAME;
+
 void setupBase()
 {
   // setup Serial output at 9600
@@ -45,7 +47,7 @@ void reconnect()
   {
     Serial.print("Attempting MQTT connection...");
     // Attempt to connect
-    if (client.connect(DEVICE_NAME))
+    if (client.connect(client_id))
     {
       Serial.println("connected");
       topicSubPub();

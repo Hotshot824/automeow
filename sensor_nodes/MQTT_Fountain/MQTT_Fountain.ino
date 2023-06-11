@@ -15,8 +15,8 @@ void initInfo()
   device_info["device_name"] = DEVICE_NAME;
   device_info["device_position"] = DEVICE_POSITION;
   device_info["device_status"] = true;
+  device_info["fountain_status"] = true;
   device_info["data"]["mode"] = "manual";
-  device_info["data"]["fountain"] = true;
 }
 
 const int radarPin = 8;
@@ -77,7 +77,7 @@ void loop()
 
   if (device_info["device_status"] && !strcmp(device_info["data"]["mode"], "manual"))
   {
-    if (device_info["data"]["fountain"])
+    if (device_info["fountain_status"])
     {
       digitalWrite(controlPin, HIGH);
     }
@@ -125,18 +125,18 @@ void handleCallback(char *topic, JSONVar payloadJSON)
       device_info["data"]["mode"] = "auto";
     }
 
-    if ((bool)payloadJSON["fountain"])
+    if ((bool)payloadJSON["fountain_status"])
     {
-      device_info["data"]["fountain"] = true;
+      device_info["fountain_status"] = true;
     }
     else
     {
-      device_info["data"]["fountain"] = false;
+      device_info["fountain_status"] = false;
     }
   }
 }
 
 void pin_change(void)
 {
-  device_info["data"]["fountain"] = !device_info["data"]["fountain"];
+  device_info["fountain_status"] = !device_info["fountain_status"];
 }
