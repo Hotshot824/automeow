@@ -38,7 +38,7 @@ setInterval(getData, 10000);
             <!-- Name, Data, Position, Online, Last upload -->
             <td>{{ device_name }}</td>
             <td>
-                Init Distance: {{ init_distance }}, Distance: {{ distance }}, Mode: {{ mode }}
+                Mode: {{ mode }}, Init Distance: {{ init_distance }} mm, Distance: {{ distance }} mm
             </td>
             <td>{{ device_position }}</td>
             <td>{{ device_status ? 'Active' : 'Inactive' }}</td>

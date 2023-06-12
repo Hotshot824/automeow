@@ -84,14 +84,14 @@ class feederClient extends SensorModuleBase {
                     "device_mode": (this._mode == "manual") ? true : false,
                 })
 
-                this._mqttClient.publish('automeow/control', pub);
+                this._mqttClient.publish('automeow/control', pub, { retain: false });
 
                 return {
                     "device_status": this._device_status
                 }
 
-            case "feeder":
-                // Here to flip status
+            case "tofeed":
+                // Change feeder status to feed.
                 pub = JSON.stringify({
                     "device_name": this._device_name,
                     "device_status": this._device_status,
@@ -99,10 +99,25 @@ class feederClient extends SensorModuleBase {
                     "device_mode": (this._mode == "manual") ? true : false,
                 })
 
-                this._mqttClient.publish('automeow/control', pub);
+                this._mqttClient.publish('automeow/control', pub, { retain: false });
 
                 return {
+                    "device_status": this._device_status,
+                    "control_result": "Success to feeder",
+                }
+
+            case "change_mode":
+                // Flip current device mode. true : manual, false : auto.
+                pub = JSON.stringify({
                     "device_name": this._device_name,
+                    "device_status": this._device_status,
+                    "feeder_status": false,
+                    "device_mode": !(this._mode == "manual")
+                })
+
+                this._mqttClient.publish('automeow/control', pub, { retain: false });
+
+                return {
                     "device_status": this._device_status,
                     "control_result": "Success to feeder",
                 }

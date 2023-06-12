@@ -37,7 +37,7 @@ setInterval(getData, 10000);
       <!-- Name, Data, Position, Online, Last upload -->
       <td>{{ device_name }}</td>
       <td>
-        Temperature: {{ temperature }}, Humidity: {{ humidity }}, Light: {{ light }}
+        Temperature: {{ temperature }} ℃, Humidity: {{ humidity }} %, Light: {{ light }}
       </td>
       <td>{{ device_position }}</td>
       <td>{{ device_status ? 'Active' : 'Inactive' }}</td>

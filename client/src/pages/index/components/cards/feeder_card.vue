@@ -16,6 +16,7 @@ defineProps({
 const store = useStore();
 
 const device_status = computed(() => store.state.feeder.device_status);
+const mode = computed(() => store.state.feeder.mode);
 
 const handleButtonClick = () => {
   let confirmation;
@@ -32,14 +33,27 @@ const handleButtonClick = () => {
 
 const handleButtonFeed = () => {
   let confirmation;
-  if (online.value) {
-    confirmation = window.confirm("Turn OFF the sensor?");
+  if (device_status.value) {
+    confirmation = window.confirm("Feeding?");
   } else {
-    confirmation = window.confirm("Turn ON the sensor?");
+    confirmation = false;
   }
 
   if (confirmation) {
     store.dispatch('feeder/toFeed');
+  }
+};
+
+const handleButtonMode = () => {
+  let confirmation;
+  if (mode.value == 'manual') {
+    confirmation = window.confirm("Change to automatic mode?");
+  } else {
+    confirmation = window.confirm("Change to manual mode?");
+  }
+
+  if (confirmation) {
+    store.dispatch('feeder/changeMode');
   }
 };
 </script>
@@ -50,10 +64,18 @@ const handleButtonFeed = () => {
     <div class="card-footer d-flex align-items-center justify-content-between">
       <div class="small text-white">{{ device_status ? 'Active' : 'Inactive' }}</div>
       <div class="d-flex">
-        <div class="small text-white"><button type="button" class="btn btn-outline-light me-2" @click="handleButtonFeed"> Feed </button>
-        </div>
-        <div class="small text-white"><button type="button" class="btn btn-light" @click="handleButtonClick">{{ device_status ?
-          'OFF' : 'ON' }}</button>
+        <div class="small text-white">
+          <div class="btn-group" role="group">
+            <button type="button" class="btn btn-outline-light" @click="handleButtonFeed" v-bind:disabled="mode !== 'manual'">
+              {{ mode == 'manual' ? 'Feed' : 'Auto' }}
+            </button>
+            <button type="button" class="btn btn-outline-light" @click="handleButtonMode">
+              {{ mode == 'manual' ? 'M' : 'A' }}
+            </button>
+            <button type="button" class="btn btn-light" @click="handleButtonClick">
+              {{ device_status ? 'OFF' : 'ON' }}
+            </button>
+          </div>
         </div>
       </div>
     </div>

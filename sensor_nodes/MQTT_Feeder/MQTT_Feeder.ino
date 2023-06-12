@@ -147,13 +147,9 @@ void handleCallback(char *topic, JSONVar payloadJSON)
       device_info["data"]["mode"] = "auto";
     }
 
-    if ((bool)payloadJSON["feeder_status"])
+    if ((bool)payloadJSON["feeder_status"] && !strcmp(device_info["data"]["mode"], "manual"))
     {
       device_info["feeder_status"] = true;
-    }
-    else
-    {
-      device_info["feeder_status"] = false;
     }
   }
 }

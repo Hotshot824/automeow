@@ -35,6 +35,12 @@ const actions = {
         commit('updateStatus', {
             device_status: data.device_status
         });
+    },
+    toFeed() {
+        sensorNodes.fetchControl("feeder-01", "tofeed");
+    },
+    changeMode() {
+        sensorNodes.fetchControl("feeder-01", "change_mode");
     }
 }
 

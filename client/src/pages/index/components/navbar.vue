@@ -2,12 +2,7 @@
 export default {
     name: "Navbar",
     props: {
-        items: {
-            type: Array,
-            required: true,
-        },
     },
-
     mounted() {
       window.addEventListener("DOMContentLoaded", this.onLoad);
     },

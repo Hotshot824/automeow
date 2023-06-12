@@ -49,6 +49,10 @@ class SensorModuleBase {
         const seconds = now.getSeconds().toString().padStart(2, '0');
         return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
     }
+
+    GetType() {
+        return this._device_type;
+    }
 }
 
 module.exports = SensorModuleBase;
