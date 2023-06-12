@@ -23,8 +23,8 @@ const int radarPin = 8;
 int ismotion;
 
 int val = 0;
-const int controlPin = 10;
-const int buttonPin = 6;
+#define CONTROL_PIN 10
+#define BUTTON_PIN 6
 
 // Device self function
 void pin_change(void);
@@ -35,20 +35,22 @@ void setup()
   setupBase();
   temp_last_time = millis();
 
-  pinMode(controlPin, OUTPUT);
-  attachInterrupt(buttonPin, pin_change, RISING);
+  pinMode(CONTROL_PIN, OUTPUT);
+  attachInterrupt(BUTTON_PIN, pin_change, RISING);
 
   pinMode(radarPin, INPUT);
 }
 
 void loop()
 {
+  // Check MQTT broker connection status
+  // If it is disconnected, reconnect to the broker
   if (!client.connected())
   {
     reconnect();
   }
 
-  // Get temperature & humidity and publish them
+  // Publish them ...
   current_time = millis();
   if (DEVICE_Publish_interval < (current_time - temp_last_time))
   {
@@ -57,13 +59,13 @@ void loop()
     client.publish(TOPIC_INFO, jsonCharArray, false);
     Serial.print("Device Mode: ");
     Serial.println(device_info["data"]["mode"]);
-    // update last time value
+    // Update last time value
     temp_last_time = current_time;
   }
 
   if (!device_info["device_status"])
   {
-    digitalWrite(controlPin, LOW);
+    digitalWrite(CONTROL_PIN, LOW);
   }
 
   if (device_info["device_status"] && !strcmp(device_info["data"]["mode"], "auto"))
@@ -72,11 +74,11 @@ void loop()
     ismotion = digitalRead(radarPin);
     if (ismotion)
     {
-      digitalWrite(controlPin, HIGH);
+      digitalWrite(CONTROL_PIN, HIGH);
     }
     else
     {
-      digitalWrite(controlPin, LOW);
+      digitalWrite(CONTROL_PIN, LOW);
     }
   }
 
@@ -84,11 +86,11 @@ void loop()
   {
     if (device_info["data"]["fountain_status"])
     {
-      digitalWrite(controlPin, HIGH);
+      digitalWrite(CONTROL_PIN, HIGH);
     }
     else
     {
-      digitalWrite(controlPin, LOW);
+      digitalWrite(CONTROL_PIN, LOW);
     }
   }
 
