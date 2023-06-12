@@ -15,8 +15,9 @@ defineProps({
 
 const store = useStore();
 
-const device_status = computed(() => store.state.feeder.device_status);
-const mode = computed(() => store.state.feeder.mode);
+const device_status = computed(() => store.state.fountain.device_status);
+const fountain_status = computed(() => store.state.fountain.fountain_status)
+const mode = computed(() => store.state.fountain.mode);
 
 const handleButtonClick = () => {
   let confirmation;
@@ -27,7 +28,7 @@ const handleButtonClick = () => {
   }
 
   if (confirmation) {
-    store.dispatch('feeder/toggle');
+    store.dispatch('fountain/toggle');
   }
 };
 
@@ -40,20 +41,20 @@ const handleButtonMode = () => {
   }
 
   if (confirmation) {
-    store.dispatch('feeder/changeMode');
+    store.dispatch('fountain/changeMode');
   }
 };
 
-const handleButtonFeed = () => {
+const handleButtonFountain = () => {
   let confirmation;
-  if (device_status.value) {
-    confirmation = window.confirm("Feeding?");
+  if (fountain_status.value) {
+    confirmation = window.confirm("Stop Feeding?");
   } else {
-    confirmation = false;
+    confirmation = window.confirm("Start Feeding?");
   }
 
   if (confirmation) {
-    store.dispatch('feeder/toFeed');
+    store.dispatch('fountain/changeFountain');
   }
 };
 </script>
@@ -66,8 +67,8 @@ const handleButtonFeed = () => {
       <div class="d-flex">
         <div class="small text-white">
           <div class="btn-group" role="group">
-            <button type="button" class="btn btn-outline-light" @click="handleButtonFeed" v-bind:disabled="mode !== 'manual' || device_status != true">
-              {{ mode == 'manual' ? 'Feed' : 'Auto' }}
+            <button type="button" class="btn btn-outline-light" @click="handleButtonFountain" v-bind:disabled="mode !== 'manual' || device_status != true">
+              {{ fountain_status ? 'Unfountain' : 'Fountain' }}
             </button>
             <button type="button" class="btn btn-outline-light" @click="handleButtonMode" v-bind:disabled="device_status != true">
               {{ mode == 'manual' ? 'M' : 'A' }}

@@ -15,17 +15,16 @@ defineProps({
 
 const store = useStore();
 
-const device_name = computed(() => store.state.feeder.device_name);
-const device_position = computed(() => store.state.feeder.device_position);
-const device_status = computed(() => store.state.feeder.device_status);
-const lastupdate = computed(() => store.state.feeder.lastupdate);
-const mode = computed(() => store.state.feeder.mode);
-const init_distance = computed(() => store.state.feeder.init_distance);
-const distance = computed(() => store.state.feeder.distance);
+const device_name = computed(() => store.state.fountain.device_name);
+const device_position = computed(() => store.state.fountain.device_position);
+const device_status = computed(() => store.state.fountain.device_status);
+const lastupdate = computed(() => store.state.fountain.lastupdate);
+const mode = computed(() => store.state.fountain.mode);
+const fountain_status = computed(() => store.state.fountain.fountain_status)
 
 
 function getData() {
-    store.dispatch('feeder/getData');
+    store.dispatch('fountain/getData');
 }
 
 getData();
@@ -38,7 +37,7 @@ setInterval(getData, 10000);
             <!-- Name, Data, Position, Online, Last upload -->
             <td>{{ device_name }}</td>
             <td>
-                Mode: {{ mode }}, Init Distance: {{ init_distance }} mm, Distance: {{ distance }} mm
+                Mode: {{ mode }}, Fountain Status: {{ fountain_status ? 'ON' : 'OFF' }}
             </td>
             <td>{{ device_position }}</td>
             <td>{{ device_status ? 'Active' : 'Inactive' }}</td>

@@ -27,7 +27,7 @@ void initInfo()
   device_info["device_name"] = DEVICE_NAME;
   device_info["device_position"] = DEVICE_POSITION;
   device_info["device_status"] = true;
-  device_info["feeder_status"] = false;
+  device_info["data"]["feeder_status"] = false;
   device_info["data"]["mode"] = "manual";
 }
 
@@ -81,7 +81,7 @@ void loop()
       int diff = init_dist - current_dist;
       if (diff <= AUTO_FEEDER_DIFF)
       {
-        device_info["feeder_status"] = true;
+        device_info["data"]["feeder_status"] = true;
       }
     }
 
@@ -95,7 +95,7 @@ void loop()
     temp_last_time = current_time;
   }
 
-  if (device_info["device_status"] && device_info["feeder_status"])
+  if (device_info["device_status"] && device_info["data"]["feeder_status"])
   {
     myservo.attach(SERVO_PIN);
     for (pos = 0; pos <= 90; pos += 1)
@@ -110,7 +110,7 @@ void loop()
       delay(5);           // waits for the servo to reach the position
     }
     delay(100);
-    device_info["feeder_status"] = !device_info["feeder_status"];
+    device_info["data"]["feeder_status"] = !device_info["data"]["feeder_status"];
     myservo.detach();
   }
 
@@ -149,7 +149,7 @@ void handleCallback(char *topic, JSONVar payloadJSON)
 
     if ((bool)payloadJSON["feeder_status"] && !strcmp(device_info["data"]["mode"], "manual"))
     {
-      device_info["feeder_status"] = true;
+      device_info["data"]["feeder_status"] = true;
     }
   }
 }
@@ -164,5 +164,5 @@ void initServo()
 
 void pin_change(void)
 {
-  device_info["feeder_status"] = !device_info["feeder_status"];
+  device_info["data"]["feeder_status"] = !device_info["data"]["feeder_status"];
 }

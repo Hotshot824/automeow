@@ -20,15 +20,21 @@ const getters = {
 const actions = {
     async getData({ commit }) {
         const response = await sensorNodes.fetchData("ENV-01");
-        commit('updateData', {
-            device_name: response.device_name,
-            device_position: response.device_position,
-            device_status: response.device_status,
-            lastupdate: response.lastupdate,
-            temperature: response.data.temperature,
-            humidity: response.data.humidity,
-            light: response.data.light,
-        });
+        if (Object.keys(response).length > 1) {
+            commit('updateData', {
+                device_name: response.device_name,
+                device_position: response.device_position,
+                device_status: response.device_status,
+                lastupdate: response.lastupdate,
+                temperature: response.data.temperature,
+                humidity: response.data.humidity,
+                light: response.data.light,
+            });
+        } else {
+            commit('updateStatus', {
+                device_status: response.device_status,
+            });
+        }
     },
     async toggle({ commit }) {
         const response = await sensorNodes.fetchControl("ENV-01", "toggle");

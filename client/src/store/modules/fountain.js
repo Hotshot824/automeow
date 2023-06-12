@@ -8,8 +8,7 @@ const state = () => ({
     device_status: true,
     lastupdate: null,
     mode: null,
-    init_distance: null,
-    distance: null,
+    fountain_status: null,
 })
 
 // getters
@@ -19,7 +18,7 @@ const getters = {
 // actions
 const actions = {
     async getData({ commit }) {
-        const response = await sensorNodes.fetchData("feeder-01");
+        const response = await sensorNodes.fetchData("fountain-01");
         if (Object.keys(response).length > 1) {
             commit('updateData', {
                 device_name: response.device_name,
@@ -27,8 +26,7 @@ const actions = {
                 device_status: response.device_status,
                 lastupdate: response.lastupdate,
                 mode: response.data.mode,
-                init_distance: response.data.init_distance,
-                distance: response.data.distance,
+                fountain_status: response.data.fountain_status,
             });
         } else {
             commit('updateStatus', {
@@ -37,33 +35,32 @@ const actions = {
         }
     },
     async toggle({ commit }) {
-        const data = await sensorNodes.fetchControl("feeder-01", "toggle");
+        const response = await sensorNodes.fetchControl("fountain-01", "toggle");
         commit('updateStatus', {
-            device_status: data.device_status
-        });
-    },
-    async toFeed({ commit }) {
-        const response = await sensorNodes.fetchControl("feeder-01", "tofeed");
-        commit('updateData', {
-            device_name: response.device_name,
-            device_position: response.device_position,
-            device_status: response.device_status,
-            lastupdate: response.lastupdate,
-            mode: response.data.mode,
-            init_distance: response.data.init_distance,
-            distance: response.data.distance,
+            device_status: response.device_status
         });
     },
     async changeMode({ commit }) {
-        const response = await sensorNodes.fetchControl("feeder-01", "change_mode");
+        const response = await sensorNodes.fetchControl("fountain-01", "change_mode");
+        console.log(response)
         commit('updateData', {
             device_name: response.device_name,
             device_position: response.device_position,
             device_status: response.device_status,
             lastupdate: response.lastupdate,
             mode: response.data.mode,
-            init_distance: response.data.init_distance,
-            distance: response.data.distance,
+            fountain_status: response.data.fountain_status,
+        });
+    },
+    async changeFountain({ commit }) {
+        const response = await sensorNodes.fetchControl("fountain-01", "change_fountain");
+        commit('updateData', {
+            device_name: response.device_name,
+            device_position: response.device_position,
+            device_status: response.device_status,
+            lastupdate: response.lastupdate,
+            mode: response.data.mode,
+            fountain_status: response.data.fountain_status,
         });
     }
 }
@@ -76,8 +73,7 @@ const mutations = {
         state.device_status = payload.device_status;
         state.lastupdate = payload.lastupdate;
         state.mode = payload.mode;
-        state.init_distance = payload.init_distance;
-        state.distance = payload.distance;
+        state.fountain_status = payload.fountain_status;
     },
     updateStatus(state, payload) {
         state.device_status = payload.device_status;

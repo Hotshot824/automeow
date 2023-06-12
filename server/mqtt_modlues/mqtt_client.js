@@ -3,6 +3,7 @@ const mqtt = require('mqtt');
 const config = require('../config.json');
 const environmentClient = require('./environment.js');
 const feederClient = require('./feeder.js');
+const fountainClient = require('./fountain.js');
 
 class SensorModuleBase {
     constructor() {
@@ -19,7 +20,7 @@ class SensorModuleBase {
         this._module_type = {
             "ENV": environmentClient,
             "feeder": feederClient,
-            // "fountain": feederClient
+            "fountain": fountainClient
         };
 
         this._mqttClient.on('connect', this._handleConnect.bind(this));

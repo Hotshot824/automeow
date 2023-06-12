@@ -13,8 +13,7 @@ class feederClient extends SensorModuleBase {
             client: 'automeow-server-Feeder',
         });
 
-        this._init_distance = data.init_distance;
-        this._distance = data.distance;
+        this._fountain_status = data.fountain_status;
         this._mode = data.mode;
 
         this._mqttClient.on('connect', this._handleConnect.bind(this));
@@ -22,7 +21,7 @@ class feederClient extends SensorModuleBase {
     }
 
     _handleConnect() {
-        console.log('Sensor module | New feeder module ' + this._device_name + ' to mqtt server connected!');
+        console.log('Sensor module | New fountain module ' + this._device_name + ' to mqtt server connected!');
         this._mqttClient.subscribe('automeow/info');
     }
 
@@ -39,8 +38,7 @@ class feederClient extends SensorModuleBase {
                     }
 
                     this._mode = info.data.mode;
-                    this._init_distance = info.data.init_distance;
-                    this._distance = info.data.distance;
+                    this._fountain_status = info.data.fountain_status;
                     this._lastupdate_time = this._updateCurrentTime();
                 }
                 break;
@@ -59,8 +57,7 @@ class feederClient extends SensorModuleBase {
             "lastupdate": this._lastupdate_time,
             "data": {
                 "mode": this._mode,
-                "init_distance": this._init_distance,
-                "distance": this._distance,
+                "fountain_status": this._fountain_status,
             }
         }
     }
@@ -80,7 +77,7 @@ class feederClient extends SensorModuleBase {
                 pub = JSON.stringify({
                     "device_name": this._device_name,
                     "device_status": this._device_status,
-                    "feeder_status": false,
+                    "fountain_status": false,
                     "device_mode": (this._mode == "manual") ? true : false,
                 })
                 break;
@@ -90,19 +87,20 @@ class feederClient extends SensorModuleBase {
                 pub = JSON.stringify({
                     "device_name": this._device_name,
                     "device_status": this._device_status,
-                    "feeder_status": false,
+                    "fountain_status": false,
                     "device_mode": !(this._mode == "manual")
                 })
                 // ... Here to filp class status
                 this._mode = (this._mode == 'manual') ? 'auto' : 'manual';
                 break;
 
-            case "tofeed":
-                // Change feeder status to feed.
+            case "change_fountain":
+                // Change fountain status to feed.
+                this._fountain_status = !this._fountain_status,
                 pub = JSON.stringify({
                     "device_name": this._device_name,
                     "device_status": this._device_status,
-                    "feeder_status": true,
+                    "fountain_status": this._fountain_status,
                     "device_mode": true,
                 })
                 break;
@@ -111,7 +109,7 @@ class feederClient extends SensorModuleBase {
                 break;
         }
         this._mqttClient.publish('automeow/control', pub, { retain: false });
-        return this.GetData()
+        return this.GetData();
     }
 }
 

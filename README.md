@@ -18,3 +18,14 @@ frontend template from : https://startbootstrap.com/template/sb-admin
 -   nginx: Reverse proxy server config.
 -   database: mysql database init file and config.
 -   sensor_modules: physical sensor.
+
+### Nodes
+
+-   Nodes:
+    -   Linkit 7697
+    -   SubPubClient 2.6 : Must be changed in the library `PubSubClient.h` => `#define MQTT_MAX_PACKET_SIZE 256`
+
+### How to run?
+
+-   Start docker: `docker compose up -d`
+-   Develoment mode backend and frontend: `npm run dev`

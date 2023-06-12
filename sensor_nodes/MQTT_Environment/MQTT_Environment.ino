@@ -36,7 +36,6 @@ void setup()
 void loop()
 {
     static float humidity, temperature;
-    static long RangeInCentimeters;
 
     // Check MQTT broker connection status
     // If it is disconnected, reconnect to the broker
@@ -66,16 +65,10 @@ void loop()
             // Serial.print("the sensor resistance is ");
             // Serial.println(Rsensor, DEC);
         }
-        else
-        {
-            device_info["data"]["humidity"] = undefined;
-            device_info["data"]["temperature"] = undefined;
-            device_info["data"]["light"] = undefined;
-        }
 
         String jsonString = JSON.stringify(device_info);
         const char *jsonCharArray = jsonString.c_str();
-        client.publish(TOPIC_INFO, jsonCharArray, strlen(jsonCharArray));
+        client.publish(TOPIC_INFO, jsonCharArray, false);
         Serial.print("Publish to ");
         Serial.println(TOPIC_INFO);
         // update last time value
@@ -89,10 +82,6 @@ void loop()
 void topicSubPub()
 {
     // Once connected, publish an announcement...
-    String jsonString = JSON.stringify(device_info);
-    const char *jsonCharArray = jsonString.c_str();
-    // ... and republish
-    client.publish(TOPIC_INFO, jsonCharArray, strlen(jsonCharArray));
     // ... and resubscribe
     client.subscribe(TOPIC_CONTROL);
 }

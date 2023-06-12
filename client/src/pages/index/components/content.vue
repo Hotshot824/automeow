@@ -43,7 +43,7 @@ const columns = [
                         <component :is="components.feeder_card" bg="bg-success" cardtitle="Feeder-01 Sensor Node"/>
                     </div>
                     <div class="col-xl-3 col-md-6">
-                        <card bg="bg-warning" cardtitle="Warning Card" />
+                        <component :is="components.fountain_card" bg="bg-warning" cardtitle="Fountain-01 Sensor Node"/>
                     </div>
                     <div class="col-xl-3 col-md-6">
                         <card bg="bg-danger" cardtitle="Danger Card" />

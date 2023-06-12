@@ -15,7 +15,7 @@ void initInfo()
   device_info["device_name"] = DEVICE_NAME;
   device_info["device_position"] = DEVICE_POSITION;
   device_info["device_status"] = true;
-  device_info["fountain_status"] = true;
+  device_info["data"]["fountain_status"] = false;
   device_info["data"]["mode"] = "manual";
 }
 
@@ -61,6 +61,11 @@ void loop()
     temp_last_time = current_time;
   }
 
+  if (!device_info["device_status"])
+  {
+    digitalWrite(controlPin, LOW);
+  }
+
   if (device_info["device_status"] && !strcmp(device_info["data"]["mode"], "auto"))
   {
     // Radar sensor read
@@ -77,7 +82,7 @@ void loop()
 
   if (device_info["device_status"] && !strcmp(device_info["data"]["mode"], "manual"))
   {
-    if (device_info["fountain_status"])
+    if (device_info["data"]["fountain_status"])
     {
       digitalWrite(controlPin, HIGH);
     }
@@ -105,11 +110,11 @@ void handleCallback(char *topic, JSONVar payloadJSON)
   {
     if ((bool)payloadJSON["device_status"])
     {
-      device_info["device_status"] = false;
+      device_info["device_status"] = true;
     }
     else
     {
-      device_info["device_status"] = true;
+      device_info["device_status"] = false;
     }
 
     if ((bool)payloadJSON["device_mode"])
@@ -123,16 +128,16 @@ void handleCallback(char *topic, JSONVar payloadJSON)
 
     if ((bool)payloadJSON["fountain_status"])
     {
-      device_info["fountain_status"] = true;
+      device_info["data"]["fountain_status"] = true;
     }
     else
     {
-      device_info["fountain_status"] = false;
+      device_info["data"]["fountain_status"] = false;
     }
   }
 }
 
 void pin_change(void)
 {
-  device_info["fountain_status"] = !device_info["fountain_status"];
+  device_info["data"]["fountain_status"] = !device_info["data"]["fountain_status"];
 }
