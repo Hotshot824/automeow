@@ -20,7 +20,8 @@ const device_position = computed(() => store.state.fountain.device_position);
 const device_status = computed(() => store.state.fountain.device_status);
 const lastupdate = computed(() => store.state.fountain.lastupdate);
 const mode = computed(() => store.state.fountain.mode);
-const fountain_status = computed(() => store.state.fountain.fountain_status)
+const fountain_status = computed(() => store.state.fountain.fountain_status);
+const fountain_run_time = computed(() => store.state.fountain.fountain_run_time);
 
 
 function getData() {
@@ -38,6 +39,9 @@ setInterval(getData, 10000);
             <td>{{ device_name }}</td>
             <td>
                 Mode: {{ mode }}, Fountain Status: {{ fountain_status ? 'ON' : 'OFF' }}
+                <template v-if="fountain_run_time > 0">
+                    , Run Time: {{ fountain_run_time }} Sec.
+                </template>
             </td>
             <td>{{ device_position }}</td>
             <td>{{ device_status ? 'Active' : 'Inactive' }}</td>

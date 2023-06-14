@@ -17,6 +17,8 @@ void initInfo()
   device_info["device_status"] = true;
   device_info["data"]["fountain_status"] = false;
   device_info["data"]["mode"] = "manual";
+  device_info["data"]["fountain_run_time"] = 0;
+  device_info["data"]["fountain_end_time"] = 0;
 }
 
 const int radarPin = 8;
@@ -43,6 +45,8 @@ void setup()
 
 void loop()
 {
+  static int first_time_toggle = 1;
+  static unsigned long start_time = 0;
   // Check MQTT broker connection status
   // If it is disconnected, reconnect to the broker
   if (!client.connected())
@@ -54,6 +58,12 @@ void loop()
   current_time = millis();
   if (DEVICE_Publish_interval < (current_time - temp_last_time))
   {
+
+    if (current_time > start_time && start_time > 0)
+    {
+      device_info["data"]["fountain_run_time"] = (millis() - start_time) / 1000;
+    }
+
     String jsonString = JSON.stringify(device_info);
     const char *jsonCharArray = jsonString.c_str();
     client.publish(TOPIC_INFO, jsonCharArray, false);
@@ -68,29 +78,42 @@ void loop()
     digitalWrite(CONTROL_PIN, LOW);
   }
 
-  if (device_info["device_status"] && !strcmp(device_info["data"]["mode"], "auto"))
+  if (device_info["device_status"])
   {
-    // Radar sensor read
-    ismotion = digitalRead(radarPin);
-    if (ismotion)
+    // If mode is auto radar sensor read
+    if (!strcmp(device_info["data"]["mode"], "auto"))
     {
-      digitalWrite(CONTROL_PIN, HIGH);
+      ismotion = digitalRead(radarPin);
+      device_info["data"]["fountain_status"] = false;
     }
     else
     {
-      digitalWrite(CONTROL_PIN, LOW);
+      ismotion = 0;
     }
-  }
 
-  if (device_info["device_status"] && !strcmp(device_info["data"]["mode"], "manual"))
-  {
-    if (device_info["data"]["fountain_status"])
+    if (device_info["data"]["fountain_status"] || ismotion)
     {
       digitalWrite(CONTROL_PIN, HIGH);
+      if (first_time_toggle)
+      {
+        first_time_toggle = 0, start_time = millis();
+      }
     }
     else
     {
       digitalWrite(CONTROL_PIN, LOW);
+      if (!first_time_toggle && start_time > 0)
+      {
+        unsigned long end_time = (millis() - start_time) / 1000;
+        device_info["data"]["fountain_end_time"] = end_time;
+
+        String jsonString = JSON.stringify(device_info);
+        const char *jsonCharArray = jsonString.c_str();
+        client.publish(TOPIC_INFO, jsonCharArray, false);
+
+        device_info["data"]["fountain_end_time"] = 0, device_info["data"]["fountain_run_time"] = 0;
+        first_time_toggle = 1, start_time = 0;
+      }
     }
   }
 

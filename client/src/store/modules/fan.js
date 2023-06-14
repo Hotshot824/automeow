@@ -8,6 +8,7 @@ const state = () => ({
     device_status: true,
     lastupdate: null,
     fan_status: null,
+    fan_run_time: null,
 })
 
 // getters
@@ -25,6 +26,7 @@ const actions = {
                 device_status: response.device_status,
                 lastupdate: response.lastupdate,
                 fan_status: response.data.fan_status,
+                fan_run_time: response.data.fan_run_time,
             });
         } else {
             commit('updateStatus', {
@@ -40,6 +42,7 @@ const actions = {
             device_status: response.device_status,
             lastupdate: response.lastupdate,
             fan_status: response.data.fan_status,
+            fan_run_time: response.data.fan_run_time,
         });
     },
     async toggleFan({ commit }) {
@@ -50,6 +53,7 @@ const actions = {
             device_status: response.device_status,
             lastupdate: response.lastupdate,
             fan_status: response.data.fan_status,
+            fan_run_time: response.data.fan_run_time,
         });
     }
 }
@@ -62,6 +66,7 @@ const mutations = {
         state.device_status = payload.device_status;
         state.lastupdate = payload.lastupdate;
         state.fan_status = payload.fan_status;
+        state.fan_run_time = payload.fan_run_time;
     },
     updateStatus(state, payload) {
         state.device_status = payload.device_status;

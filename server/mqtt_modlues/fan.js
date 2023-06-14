@@ -14,6 +14,8 @@ class fanClient extends SensorModuleBase {
         });
 
         this._fan_status = data.fan_status;
+        this._fan_run_time = data.fan_run_time;
+        this._fan_end_time = data.fan_end_time;
 
         this._mqttClient.on('connect', this._handleConnect.bind(this));
         this._mqttClient.on('message', this._handleMessage.bind(this));
@@ -37,7 +39,14 @@ class fanClient extends SensorModuleBase {
                     }
 
                     this._fan_status = info.data.fan_status;
+                    this._fan_run_time = info.data.fan_run_time;
+                    this._fan_end_time = info.data.fan_end_time;
                     this._lastupdate_time = this._updateCurrentTime();
+
+                    if (this._fan_end_time > 0) {
+                        console.log(this._fan_end_time);
+                        this._fan_end_time = 0;
+                    }
                 }
                 break;
             default:
@@ -55,6 +64,7 @@ class fanClient extends SensorModuleBase {
             "lastupdate": this._lastupdate_time,
             "data": {
                 "fan_status": this._fan_status,
+                "fan_run_time": this._fan_run_time,
             }
         }
     }
@@ -79,7 +89,6 @@ class fanClient extends SensorModuleBase {
                 })
                 break;
             case "toggle_fan":
-                // Here to flip status
                 this._fan_status = !this._fan_status;
                 pub = JSON.stringify({
                     "device_name": this._device_name,

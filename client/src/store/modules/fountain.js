@@ -9,6 +9,7 @@ const state = () => ({
     lastupdate: null,
     mode: null,
     fountain_status: null,
+    fountain_run_time: null,
 })
 
 // getters
@@ -27,6 +28,7 @@ const actions = {
                 lastupdate: response.lastupdate,
                 mode: response.data.mode,
                 fountain_status: response.data.fountain_status,
+                fountain_run_time: response.data.fountain_run_time,
             });
         } else {
             commit('updateStatus', {
@@ -50,10 +52,11 @@ const actions = {
             lastupdate: response.lastupdate,
             mode: response.data.mode,
             fountain_status: response.data.fountain_status,
+            fountain_run_time: response.data.fountain_run_time,
         });
     },
     async changeFountain({ commit }) {
-        const response = await sensorNodes.fetchControl("fountain-01", "change_fountain");
+        const response = await sensorNodes.fetchControl("fountain-01", "toggle_fountain");
         commit('updateData', {
             device_name: response.device_name,
             device_position: response.device_position,
@@ -61,6 +64,7 @@ const actions = {
             lastupdate: response.lastupdate,
             mode: response.data.mode,
             fountain_status: response.data.fountain_status,
+            fountain_run_time: response.data.fountain_run_time,
         });
     }
 }
@@ -74,6 +78,7 @@ const mutations = {
         state.lastupdate = payload.lastupdate;
         state.mode = payload.mode;
         state.fountain_status = payload.fountain_status;
+        state.fountain_run_time = payload.fountain_run_time;
     },
     updateStatus(state, payload) {
         state.device_status = payload.device_status;

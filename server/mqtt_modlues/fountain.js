@@ -14,6 +14,8 @@ class feederClient extends SensorModuleBase {
         });
 
         this._fountain_status = data.fountain_status;
+        this._fountain_run_time = data.fountain_run_time;
+        this._fountain_end_time = data.fountain_end_time;
         this._mode = data.mode;
 
         this._mqttClient.on('connect', this._handleConnect.bind(this));
@@ -39,7 +41,14 @@ class feederClient extends SensorModuleBase {
 
                     this._mode = info.data.mode;
                     this._fountain_status = info.data.fountain_status;
+                    this._fountain_run_time = info.data.fountain_run_time;
+                    this._fountain_end_time = info.data.fountain_end_time;
                     this._lastupdate_time = this._updateCurrentTime();
+
+                    if (this._fountain_end_time > 0) {
+                        console.log(this._fountain_end_time);
+                        this._fountain_end_time = 0;
+                    }
                 }
                 break;
             default:
@@ -58,6 +67,7 @@ class feederClient extends SensorModuleBase {
             "data": {
                 "mode": this._mode,
                 "fountain_status": this._fountain_status,
+                "fountain_run_time": this._fountain_run_time,
             }
         }
     }
@@ -94,8 +104,8 @@ class feederClient extends SensorModuleBase {
                 this._mode = (this._mode == 'manual') ? 'auto' : 'manual';
                 break;
 
-            case "change_fountain":
-                // Change fountain status to feed.
+            case "toggle_fountain":
+                // Toggle fountain status to feed.
                 this._fountain_status = !this._fountain_status,
                 pub = JSON.stringify({
                     "device_name": this._device_name,

@@ -20,6 +20,7 @@ const device_position = computed(() => store.state.fan.device_position);
 const device_status = computed(() => store.state.fan.device_status);
 const lastupdate = computed(() => store.state.fan.lastupdate);
 const fan_status = computed(() => store.state.fan.fan_status);
+const fan_run_time = computed(() => store.state.fan.fan_run_time);
 
 
 function getData() {
@@ -37,6 +38,9 @@ setInterval(getData, 10000);
             <td>{{ device_name }}</td>
             <td>
                 Fan Status: {{ fan_status ? 'ON' : 'OFF' }}
+                <template v-if="fan_run_time > 0">
+                    , Run Time: {{ fan_run_time }} Sec.
+                </template>
             </td>
             <td>{{ device_position }}</td>
             <td>{{ device_status ? 'Active' : 'Inactive' }}</td>

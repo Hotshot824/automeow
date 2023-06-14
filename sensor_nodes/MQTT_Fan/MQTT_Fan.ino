@@ -16,7 +16,8 @@ void initInfo()
     device_info["device_position"] = DEVICE_POSITION;
     device_info["device_status"] = true;
     device_info["data"]["fan_status"] = false;
-    device_info["data"]["switch"] = false;
+    device_info["data"]["fan_run_time"] = 0;
+    device_info["data"]["fan_end_time"] = 0;
 }
 
 int val = 0;
@@ -40,6 +41,8 @@ void setup()
 
 void loop()
 {
+    static int first_time_toggle = 1;
+    static unsigned long start_time = 0;
     // Check MQTT broker connection status
     // If it is disconnected, reconnect to the broker
     if (!client.connected())
@@ -51,6 +54,11 @@ void loop()
     current_time = millis();
     if (PUB_INTERVAL < (current_time - temp_last_time))
     {
+        if (current_time > start_time && start_time > 0)
+        {
+            device_info["data"]["fan_run_time"] = (millis() - start_time) / 1000;
+        }
+
         String jsonString = JSON.stringify(device_info);
         const char *jsonCharArray = jsonString.c_str();
         client.publish(TOPIC_INFO, jsonCharArray, false);
@@ -60,33 +68,29 @@ void loop()
         temp_last_time = current_time;
     }
 
-    if (device_info["device_status"])
+    // Set a flag to pulish first time info.
+    if (device_info["device_status"] && device_info["data"]["fan_status"])
     {
-        // Set a flag to pulish first time info.
-        static int switchflag = 0;
-        if (device_info["data"]["fan_status"])
+        digitalWrite(CONTROL_PIN, HIGH);
+        if (first_time_toggle)
         {
-            digitalWrite(CONTROL_PIN, HIGH);
-            if (switchflag)
-            {
-                device_info["data"]["switch"] = true;
-                String jsonString = JSON.stringify(device_info);
-                const char *jsonCharArray = jsonString.c_str();
-                client.publish(TOPIC_SWTICH, jsonCharArray, false);
-                switchflag = !switchflag;
-            }
+            first_time_toggle = 0, start_time = millis();
         }
-        else
+    }
+    else
+    {
+        digitalWrite(CONTROL_PIN, LOW);
+        if (!first_time_toggle && start_time > 0)
         {
-            digitalWrite(CONTROL_PIN, LOW);
-            if (!switchflag)
-            {
-                device_info["data"]["switch"] = false;
-                String jsonString = JSON.stringify(device_info);
-                const char *jsonCharArray = jsonString.c_str();
-                client.publish(TOPIC_SWTICH, jsonCharArray, false);
-                switchflag = !switchflag;
-            }
+            unsigned long end_time = (millis() - start_time) / 1000;
+            device_info["data"]["fan_end_time"] = end_time;
+
+            String jsonString = JSON.stringify(device_info);
+            const char *jsonCharArray = jsonString.c_str();
+            client.publish(TOPIC_INFO, jsonCharArray, false);
+            
+            device_info["data"]["fan_end_time"] = 0, device_info["data"]["fan_run_time"] = 0;
+            first_time_toggle = 1, start_time = 0;
         }
     }
 

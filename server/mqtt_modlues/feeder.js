@@ -42,6 +42,10 @@ class feederClient extends SensorModuleBase {
                     this._init_distance = info.data.init_distance;
                     this._distance = info.data.distance;
                     this._lastupdate_time = this._updateCurrentTime();
+
+                    if (info.data.feeder_status) {
+                        console.log("Start feeding!");
+                    }
                 }
                 break;
             default:

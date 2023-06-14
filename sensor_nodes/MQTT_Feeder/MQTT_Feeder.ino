@@ -60,7 +60,7 @@ void loop()
 
   // Get info publish them ...
   current_time = millis();
-  if (PUB_INTERVAL < (current_time - temp_last_time))
+  if (PUB_INTERVAL < (current_time - temp_last_time) || device_info["data"]["feeder_status"])
   {
     if (device_info["device_status"])
     {
@@ -100,12 +100,11 @@ void loop()
     myservo.attach(SERVO_PIN);
     for (pos = 0; pos <= 90; pos += 1)
     {
-      // goes from 0 degrees to 90 degrees
       myservo.write(pos); // tell servo to go to position in variable 'pos'
       delay(5);           // waits for the servo to reach the position
     }
     for (pos = 90; pos >= 0; pos -= 1)
-    {                     // goes from 90 degrees to 0 degrees
+    {
       myservo.write(pos); // tell servo to go to position in variable 'pos'
       delay(5);           // waits for the servo to reach the position
     }

@@ -33,7 +33,7 @@ class SensorModuleBase {
         setInterval(() => {
             let current_time = this._updateCurrentTime();
             let time_diff_in_seconds = Math.abs(new Date(current_time) - new Date(this._lastupdate_time)) / 1000;
-            if (time_diff_in_seconds >= 30 || !time_diff_in_seconds) {
+            if (time_diff_in_seconds >= 30 || isNaN(time_diff_in_seconds)) {
                 this._device_status = false;
             }
         }, 30000);
