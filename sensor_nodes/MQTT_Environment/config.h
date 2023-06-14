@@ -8,8 +8,8 @@
 // MQTT connect and handle
 
 // WiFi AP ssid / password here
-#define _SSID_ "419-61"    //  your network SSID (name)
-#define _PASSWORD_ "917681387" // your network password (use for WPA, or use as key for WEP)
+#define _SSID_ "SSID"    //  your network SSID (name)
+#define _PASSWORD_ "PASSWORD" // your network password (use for WPA, or use as key for WEP)
 
 // MQTT Broker info
 // IPAddress server(192, 168, 1, 182);

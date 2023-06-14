@@ -36,37 +36,4 @@ router.get('/contorl', async (ctx, next) => {
     }
 })
 
-// router.post('/control', async (ctx, next) => {
-//   const requestBody = ctx.request.body;
-//   switch (requestBody.topic) {
-//     case 'automeow/DHT22/control':
-//       ctx.body = {
-//         message: "DHT sensor toggle.",
-//         online: DHT22.Toggle()
-//       }
-//       break;
-
-//     case 'automeow/feeder/control':
-//       ctx.body = {
-//         message: "feeder sensor toggle.",
-//         online: feeder.Toggle()
-//       }
-//       break;
-
-//     case 'automeow/feeder/control/tofeed':
-//       ctx.body = {
-//         message: "feeder sensor toggle.",
-//         online: feeder.ToFeed()
-//       }
-//       break;
-
-//     default:
-//       ctx.body = {
-//         title: 'Not have the correct topic.'
-//       }
-//       break;
-//   }
-// })
-
-
 module.exports = router
