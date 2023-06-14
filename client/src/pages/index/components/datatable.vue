@@ -47,6 +47,7 @@ window.addEventListener('DOMContentLoaded', event => {
                     <component :is="components.environment_data"/>
                     <component :is="components.feeder_data"/>
                     <component :is="components.fountain_data"/>
+                    <component :is="components.fan_data"/>
                 </tbody>
             </table>
         </div>

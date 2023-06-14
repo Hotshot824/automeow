@@ -15,9 +15,8 @@ defineProps({
 
 const store = useStore();
 
-const device_status = computed(() => store.state.fountain.device_status);
-const fountain_status = computed(() => store.state.fountain.fountain_status)
-const mode = computed(() => store.state.fountain.mode);
+const device_status = computed(() => store.state.fan.device_status);
+const fan_status = computed(() => store.state.fan.fan_status)
 
 const handleButtonClick = () => {
   let confirmation;
@@ -28,33 +27,20 @@ const handleButtonClick = () => {
   }
 
   if (confirmation) {
-    store.dispatch('fountain/toggle');
+    store.dispatch('fan/toggle');
   }
 };
 
-const handleButtonMode = () => {
+const handleButtonFan = () => {
   let confirmation;
-  if (mode.value == 'manual') {
-    confirmation = window.confirm("Change to automatic mode?");
+  if (fan_status.value) {
+    confirmation = window.confirm("Stop fan?");
   } else {
-    confirmation = window.confirm("Change to manual mode?");
+    confirmation = window.confirm("Start fan?");
   }
 
   if (confirmation) {
-    store.dispatch('fountain/changeMode');
-  }
-};
-
-const handleButtonFountain = () => {
-  let confirmation;
-  if (fountain_status.value) {
-    confirmation = window.confirm("Stop fountain?");
-  } else {
-    confirmation = window.confirm("Start fountain?");
-  }
-
-  if (confirmation) {
-    store.dispatch('fountain/changeFountain');
+    store.dispatch('fan/toggleFan');
   }
 };
 </script>
@@ -67,11 +53,8 @@ const handleButtonFountain = () => {
       <div class="d-flex">
         <div class="small text-white">
           <div class="btn-group" role="group">
-            <button type="button" class="btn btn-outline-light" @click="handleButtonFountain" v-bind:disabled="mode !== 'manual' || device_status != true">
-              {{ fountain_status ? 'Unfountain' : 'Fountain' }}
-            </button>
-            <button type="button" class="btn btn-outline-light" @click="handleButtonMode" v-bind:disabled="device_status != true">
-              {{ mode == 'manual' ? 'M' : 'A' }}
+            <button type="button" class="btn btn-outline-light" @click="handleButtonFan" v-bind:disabled="device_status != true">
+              {{ fan_status ? 'Fan OFF' : 'Fan ON' }}
             </button>
             <button type="button" class="btn btn-light" @click="handleButtonClick">
               {{ device_status ? 'OFF' : 'ON' }}

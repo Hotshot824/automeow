@@ -155,29 +155,21 @@ class environmentClient extends SensorModuleBase {
     }
 
     Control(control_type) {
+        let pub;
         switch (control_type) {
             case "toggle":
                 // Here to flip status
-                let pub = JSON.stringify({
-                    "device_name": this._device_name,
-                    "device_status": !this._device_status,
-                })
-
-                if (this._device_status) {
-                    this._mqttClient.publish('automeow/control', pub, { retain: false });
-                } else {
-                    this._mqttClient.publish('automeow/control', pub, { retain: false });
-                }
                 this._device_status = !this._device_status;
-
-                return {
+                pub = JSON.stringify({
                     "device_name": this._device_name,
-                    "device_status": this._device_status
-                }
-
+                    "device_status": this._device_status,
+                })
+                break;
             default:
                 break;
         }
+        this._mqttClient.publish('automeow/control', pub, { retain: false });
+        return this.GetData()
     }
 }
 
