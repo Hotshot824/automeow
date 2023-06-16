@@ -9,21 +9,26 @@ This is an IOT care system for my cat, using linkit 7697 MCU to develop a remote
 3. ambient temperature and humidity sensing
 4. smart fan
 
-*Web pages can be used to control IoT nodes, and web pages support responsive design.*
+*Web pages can be used to control IoT nodes, and web pages support responsive web design(RWD).*
 
 ![](https://github.com/Hotshot824/automeow/blob/main/docs/image01.jpg?raw=true)
 
 *Prototype of IoT device:*
 
-- *fountain-01*
+- *fountain-01: Support automatic or manual circulation water fountain device.*
 
 ![](https://github.com/Hotshot824/automeow/blob/main/docs/image02.jpg?raw=true)
 
-- *feeder-01*
+- *feeder-01: The capacity of the bowl is measured with a laser distance sensor,  
+can be fed automatically or manually.*
 
 ![](https://github.com/Hotshot824/automeow/blob/main/docs/image03.jpg?raw=true)
 
 ### How to run?
+
+-   node v16.20.0
+-   docker v24.0.2
+    -   docker compose v2.18.1
 
 First install docker && docker compose, then install the nodejs dependency package `npm install`.
 
